@@ -1,9 +1,10 @@
 package com.example.service_d;
 
 import jakarta.persistence.*;
+import java.io.Serializable;
 
 @Entity
-public class Document {
+public class Document implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
