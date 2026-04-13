@@ -7,24 +7,34 @@ import java.util.List;
 @RequestMapping("/documents")
 public class DocumentController {
 
-    private final DocumentRepository repository;
+    private final DocumentService service;
 
-    public DocumentController(DocumentRepository repository) {
-        this.repository = repository;
+    public DocumentController(DocumentService service) {
+        this.service = service;
     }
 
     @GetMapping("/list")
     public List<Document> list() {
-        return repository.findAll();
+        return service.getAllDocuments();
     }
 
     @GetMapping("/get/{id}")
     public Document get(@PathVariable Long id) {
-        return repository.findById(id).orElse(null);
+        return service.getDocumentById(id);
     }
 
     @PostMapping("/add")
     public Document add(@RequestBody Document doc) {
-        return repository.save(doc);
+        return service.addDocument(doc);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public void delete(@PathVariable Long id) {
+        service.deleteDocument(id);
+    }
+
+    @PutMapping("/update/{id}")
+    public Document update(@PathVariable Long id, @RequestBody Document doc) {
+        return service.updateDocument(id, doc);
     }
 }
