@@ -5,6 +5,22 @@ services:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
 
+  cassandra:
+    image: cassandra:4.1
+    ports:
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=dms-cluster
+      - CASSANDRA_DC=datacenter1
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=128M
+    healthcheck:
+      test: ["CMD-SHELL", "cqlsh -e 'describe cluster'"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+      start_period: 60s
+
   documents:
     build:
       context: ./service-d
@@ -15,3 +31,14 @@ services:
       - SPRING_REDIS_PORT=6379
     depends_on:
       - redis
+
+  comments:
+    build:
+      context: ./service-m
+    ports:
+      - "8083:8083"
+    environment:
+      - CASSANDRA_CONTACT_POINTS=cassandra
+    depends_on:
+      cassandra:
+        condition: service_healthy
