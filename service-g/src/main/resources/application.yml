@@ -1,0 +1,22 @@
+server:
+  port: 8080
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      server:
+        webmvc:
+          routes:
+            - id: documents
+              uri: http://documents:8081 # Changed from localhost
+              predicates:
+                - Path=/api/documents/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /${segment}
+            - id: comments
+              uri: http://comments:8083 # Changed from localhost
+              predicates:
+                - Path=/api/comments/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /${segment}
