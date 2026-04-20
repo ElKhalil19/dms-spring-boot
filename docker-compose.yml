@@ -5,6 +5,21 @@ services:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
 
+  postgres:
+    image: postgres:15
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=dms
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d dms"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
   cassandra:
     image: cassandra:4.1
     ports:
@@ -32,8 +47,14 @@ services:
     environment:
       - SPRING_REDIS_HOST=redis
       - SPRING_REDIS_PORT=6379
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dms
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=postgres
     depends_on:
-      - redis
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   cassandra-init:
     image: cassandra:4.1
@@ -43,6 +64,22 @@ services:
     volumes:
       - ./init-cassandra.sh:/init-cassandra.sh
     command: ["/bin/bash", "/init-cassandra.sh"]
+    restart: on-failure
+
+  postgres-init:
+    image: postgres:15
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./init-postgres.sh:/init-postgres.sh
+    environment:
+      - PGHOST=postgres
+      - PGPORT=5432
+      - PGUSER=postgres
+      - PGPASSWORD=postgres
+      - PGDATABASE=dms
+    command: ["/bin/bash", "/init-postgres.sh"]
     restart: on-failure
 
   comments:
