@@ -32,6 +32,16 @@ services:
     depends_on:
       - redis
 
+  cassandra-init:
+    image: cassandra:4.1
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+      - ./init-cassandra.sh:/init-cassandra.sh
+    command: ["/bin/bash", "/init-cassandra.sh"]
+    restart: on-failure
+
   comments:
     build:
       context: ./service-m
@@ -40,5 +50,5 @@ services:
     environment:
       - CASSANDRA_CONTACT_POINTS=cassandra
     depends_on:
-      cassandra:
-        condition: service_healthy
+      cassandra-init:
+        condition: service_completed_successfully
