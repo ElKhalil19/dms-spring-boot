@@ -10,6 +10,7 @@ public class Document implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String title;
+    private String owner;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -28,6 +29,8 @@ public class Document implements Serializable {
     public Long getId() { return id; }
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+    public String getOwner() { return owner; }
+    public void setOwner(String owner) { this.owner = owner; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

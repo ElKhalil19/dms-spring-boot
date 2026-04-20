@@ -1,0 +1,45 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: comments-deployment
+  namespace: default
+  labels:
+    app: comments
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: comments
+  template:
+    metadata:
+      labels:
+        app: comments
+    spec:
+      containers:
+        - name: comments
+          image: comments:latest
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8083
+          envFrom:
+            - configMapRef:
+                name: dms-config
+          readinessProbe:
+            httpGet:
+              path: /comments/list/00000000-0000-0000-0000-000000000000
+              port: 8083
+            initialDelaySeconds: 30
+            periodSeconds: 10
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: comments-service
+  namespace: default
+spec:
+  selector:
+    app: comments
+  ports:
+    - port: 8083
+      targetPort: 8083

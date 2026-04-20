@@ -1,6 +1,10 @@
 package com.example.service_d;
 
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
 
 @RestController
@@ -24,16 +28,20 @@ public class DocumentController {
     }
 
     @PostMapping("/add")
-    public Document add(@RequestBody Document doc) {
-        return service.addDocument(doc);
+    @PreAuthorize("isAuthenticated()")
+    public Document add(@RequestBody Document doc,
+                        @AuthenticationPrincipal UserDetails userDetails) {
+        return service.addDocument(doc, userDetails.getUsername());
     }
 
     @DeleteMapping("/delete/{id}")
+    @PreAuthorize("isAuthenticated()")
     public void delete(@PathVariable Long id) {
         service.deleteDocument(id);
     }
 
     @PutMapping("/update/{id}")
+    @PreAuthorize("isAuthenticated()")
     public Document update(@PathVariable Long id, @RequestBody Document doc) {
         return service.updateDocument(id, doc);
     }
