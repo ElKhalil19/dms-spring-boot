@@ -34,7 +34,8 @@ public class CommentController {
             comment.setKey(new CommentKey());
         }
         comment.getKey().setDocId(docId);
-        return saveComment(comment);
+        comment.getKey().setCommentId(Uuids.timeBased());
+        return repository.save(comment);
     }
 
     /** Standard REST endpoint: GET /documents/{docId}/comments */

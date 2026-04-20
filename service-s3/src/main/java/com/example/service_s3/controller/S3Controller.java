@@ -79,13 +79,22 @@ public class S3Controller {
     @PostMapping("/presigned-upload")
     public ResponseEntity<Map<String, String>> getPresignedUploadUrl(
             @RequestParam(value = "filename", required = false) String filename) {
-        String key = "uploads/" + UUID.randomUUID() + (filename != null ? "-" + filename : "");
+        String safeName = sanitizeFilename(filename);
+        String key = "uploads/" + UUID.randomUUID() + (safeName != null ? "-" + safeName : "");
         PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
                 .signatureDuration(Duration.ofHours(1))
                 .putObjectRequest(r -> r.bucket(bucketName).key(key))
                 .build();
         String url = s3Presigner.presignPutObject(presignRequest).url().toString();
         return ResponseEntity.ok(Map.of("url", url, "key", key));
+    }
+
+    private String sanitizeFilename(String filename) {
+        if (filename == null) {
+            return null;
+        }
+        // Remove path separators and null bytes to prevent path traversal
+        return filename.replaceAll("[/\\\\\\x00]", "_");
     }
 
     /**

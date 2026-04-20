@@ -43,7 +43,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: documents-service
+  name: documents
   namespace: default
 spec:
   selector:

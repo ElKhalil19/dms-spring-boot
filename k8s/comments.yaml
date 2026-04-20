@@ -35,7 +35,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: comments-service
+  name: comments
   namespace: default
 spec:
   selector:
