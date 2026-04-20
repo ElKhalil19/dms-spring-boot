@@ -12,6 +12,9 @@ services:
     environment:
       - CASSANDRA_CLUSTER_NAME=dms-cluster
       - CASSANDRA_DC=datacenter1
+      - CASSANDRA_RACK=rack1
+      - CASSANDRA_ENDPOINT_SNITCH=GossipingPropertyFileSnitch
+      - CASSANDRA_NUM_TOKENS=256
       - MAX_HEAP_SIZE=512M
       - HEAP_NEWSIZE=128M
     healthcheck:
