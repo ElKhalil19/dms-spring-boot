@@ -8,15 +8,27 @@ spring:
       server:
         webmvc:
           routes:
+            - id: auth
+              uri: http://documents:8081
+              predicates:
+                - Path=/api/auth/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /${segment}
             - id: documents
-              uri: http://documents:8081 # Changed from localhost
+              uri: http://documents:8081
               predicates:
                 - Path=/api/documents/**
               filters:
                 - RewritePath=/api/(?<segment>.*), /${segment}
             - id: comments
-              uri: http://comments:8083 # Changed from localhost
+              uri: http://comments:8083
               predicates:
                 - Path=/api/comments/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /${segment}
+            - id: s3
+              uri: http://s3-service:8010
+              predicates:
+                - Path=/api/s3/**
               filters:
                 - RewritePath=/api/(?<segment>.*), /${segment}

@@ -4,6 +4,11 @@ services:
     ports:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   postgres:
     image: postgres:15
@@ -39,6 +44,57 @@ services:
       retries: 10
       start_period: 60s
 
+  zookeeper:
+    image: confluentinc/cp-zookeeper:7.5.0
+    ports:
+      - "2181:2181"
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc localhost 2181 | grep imok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: PLAINTEXT
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092"]
+      interval: 15s
+      timeout: 10s
+      retries: 10
+      start_period: 30s
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      MINIO_ROOT_USER: admin
+      MINIO_ROOT_PASSWORD: ensia123456
+    command: server /data --console-address ":9001"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   documents:
     build:
       context: ./service-d
@@ -50,11 +106,16 @@ services:
       - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/dms
       - SPRING_DATASOURCE_USERNAME=postgres
       - SPRING_DATASOURCE_PASSWORD=postgres
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:9092
+      # Override JWT_SECRET with a strong secret in production (e.g., via .env file)
+      - JWT_SECRET=${JWT_SECRET:-changeme-super-secret-key-for-local-dev-only}
     depends_on:
       postgres:
         condition: service_healthy
       redis:
-        condition: service_started
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
 
   cassandra-init:
     image: cassandra:4.1
@@ -92,3 +153,27 @@ services:
     depends_on:
       cassandra-init:
         condition: service_completed_successfully
+
+  s3-service:
+    build:
+      context: ./service-s3
+    ports:
+      - "8010:8010"
+    environment:
+      - APP_S3_ENDPOINT=http://minio:9000
+      - APP_S3_ACCESS_KEY=admin
+      - APP_S3_SECRET_KEY=ensia123456
+      - APP_S3_BUCKET=dms-bucket
+    depends_on:
+      minio:
+        condition: service_healthy
+
+  gateway:
+    build:
+      context: ./service-g
+    ports:
+      - "8080:8080"
+    depends_on:
+      - documents
+      - comments
+
