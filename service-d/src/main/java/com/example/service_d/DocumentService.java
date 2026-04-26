@@ -11,9 +11,11 @@ import java.util.List;
 public class DocumentService {
 
     private final DocumentRepository repository;
+    private final DocumentEventProducer eventProducer;
 
-    public DocumentService(DocumentRepository repository) {
+    public DocumentService(DocumentRepository repository, DocumentEventProducer eventProducer) {
         this.repository = repository;
+        this.eventProducer = eventProducer;
     }
 
     public List<Document> getAllDocuments() {
@@ -27,7 +29,10 @@ public class DocumentService {
 
     @CachePut(value = "documents", key = "#result.id")
     public Document addDocument(Document doc) {
-        return repository.save(doc);
+        Document saved = repository.save(doc);
+        eventProducer.publishDocumentUploaded(
+                new DocumentUploadedEvent(saved.getId(), saved.getTitle(), saved.getCreatedAt()));
+        return saved;
     }
 
     @CacheEvict(value = "documents", key = "#id")
