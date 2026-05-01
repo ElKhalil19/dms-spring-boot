@@ -1,0 +1,9 @@
+// Service modules — add API call helpers here as the project grows.
+// Example modules to implement:
+//   - authService.js   (login, logout, register)
+//   - documentService.js (CRUD for documents)
+//   - userService.js   (CRUD for users)
+//   - commentService.js (CRUD for comments)
+//
+// Base URL for json-server: http://localhost:3001
+// When using Vite proxy, use the /api prefix configured in vite.config.js.

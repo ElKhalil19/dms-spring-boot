@@ -1,0 +1,87 @@
+const BASE_URL = '/api'
+
+async function request(path, options = {}) {
+  const url = `${BASE_URL}${path}`
+  const config = {
+    headers: { 'Content-Type': 'application/json', ...options.headers },
+    ...options,
+  }
+  if (config.body && typeof config.body !== 'string') {
+    config.body = JSON.stringify(config.body)
+  }
+  const response = await fetch(url, config)
+  if (!response.ok) {
+    const error = await response.text()
+    throw new Error(error || `HTTP ${response.status}`)
+  }
+  if (response.status === 204) return null
+  return response.json()
+}
+
+export const api = {
+  get: (path, params) => {
+    const query = params ? '?' + new URLSearchParams(params).toString() : ''
+    return request(`${path}${query}`)
+  },
+  post: (path, body) => request(path, { method: 'POST', body }),
+  put: (path, body) => request(path, { method: 'PUT', body }),
+  patch: (path, body) => request(path, { method: 'PATCH', body }),
+  delete: (path) => request(path, { method: 'DELETE' }),
+}
+
+// --- Users ---
+export const usersApi = {
+  getAll: () => api.get('/users'),
+  getById: (id) => api.get(`/users/${id}`),
+  create: (data) => api.post('/users', data),
+  update: (id, data) => api.patch(`/users/${id}`, data),
+  delete: (id) => api.delete(`/users/${id}`),
+  // NOTE: This client-side credential check is for development/demo only (json-server mock).
+  // In production, authentication must be handled by a secure backend with hashed passwords.
+  login: async ({ email, password }) => {
+    const users = await api.get('/users')
+    const user = users.find((u) => u.email === email && u.password === password)
+    if (!user) throw new Error('Invalid email or password')
+    return user
+  },
+}
+
+// --- Documents ---
+export const documentsApi = {
+  getAll: (params) => api.get('/documents', params),
+  getById: (id) => api.get(`/documents/${id}`),
+  create: (data) => api.post('/documents', data),
+  update: (id, data) => api.patch(`/documents/${id}`, data),
+  delete: (id) => api.delete(`/documents/${id}`),
+}
+
+// --- Versions ---
+export const versionsApi = {
+  getByDocument: (documentId) => api.get('/versions', { documentId }),
+  create: (data) => api.post('/versions', data),
+}
+
+// --- Comments ---
+export const commentsApi = {
+  getByDocument: (documentId) => api.get('/comments', { documentId }),
+  create: (data) => api.post('/comments', data),
+  delete: (id) => api.delete(`/comments/${id}`),
+}
+
+// --- Categories ---
+export const categoriesApi = {
+  getAll: () => api.get('/categories'),
+}
+
+// --- Departments ---
+export const departmentsApi = {
+  getAll: () => api.get('/departments'),
+  create: (data) => api.post('/departments', data),
+  update: (id, data) => api.patch(`/departments/${id}`, data),
+}
+
+// --- Activity Logs ---
+export const activityLogsApi = {
+  getAll: () => api.get('/activityLogs'),
+  create: (data) => api.post('/activityLogs', data),
+}

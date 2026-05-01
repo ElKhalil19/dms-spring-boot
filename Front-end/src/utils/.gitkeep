@@ -1,0 +1,7 @@
+// Utility/helper functions — add pure, reusable helpers here as the project grows.
+// Example utilities to implement:
+//   - formatDate(dateString)
+//   - truncateText(text, maxLength)
+//   - formatFileSize(bytes)
+//   - generateId()
+//   - debounce(fn, delay)

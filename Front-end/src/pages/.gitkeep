@@ -1,0 +1,11 @@
+// Page-level components mapped to routes — add page modules here as the project grows.
+// Example pages to implement:
+//   - LoginPage
+//   - DashboardPage
+//   - DocumentsPage
+//   - DocumentDetailPage
+//   - UploadPage
+//   - AdminUsersPage
+//   - AdminDepartmentsPage
+//   - AdminCategoriesPage
+//   - NotFoundPage

@@ -1,0 +1,5 @@
+[
+  { "id": 1, "name": "Alice Admin", "email": "admin@dms.com", "password": "admin123", "role": "admin", "departmentId": 1, "status": "active" },
+  { "id": 2, "name": "Bob User", "email": "bob@dms.com", "password": "user123", "role": "user", "departmentId": 2, "status": "active" },
+  { "id": 3, "name": "Carol User", "email": "carol@dms.com", "password": "user123", "role": "user", "departmentId": 1, "status": "active" }
+]

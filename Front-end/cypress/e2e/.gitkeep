@@ -1,0 +1,7 @@
+// E2E test specs go here.
+// Example spec files to create as features are developed:
+//   - auth.cy.js          (login, logout, protected routes)
+//   - documents.cy.js     (list, upload, view, delete)
+//   - admin-users.cy.js   (user CRUD, suspend, export)
+//   - admin-categories.cy.js
+//   - admin-departments.cy.js

@@ -1,0 +1,393 @@
+{
+  "users": [
+    {
+      "id": 1,
+      "name": "Alice Admin",
+      "email": "admin@dms.com",
+      "password": "admin123",
+      "role": "admin",
+      "departmentId": 1,
+      "status": "active"
+    },
+    {
+      "id": 2,
+      "name": "Bob User",
+      "email": "bob@dms.com",
+      "password": "user123",
+      "role": "user",
+      "departmentId": 2,
+      "status": "active"
+    }
+  ],
+  "departments": [
+    {
+      "id": 1,
+      "name": "Engineering",
+      "description": "Software engineering team"
+    },
+    {
+      "id": 2,
+      "name": "Marketing",
+      "description": "Marketing and communications"
+    },
+    {
+      "id": 3,
+      "name": "HR",
+      "description": "Human resources"
+    }
+  ],
+  "categories": [
+    {
+      "id": 1,
+      "name": "Policy"
+    },
+    {
+      "id": 2,
+      "name": "Report"
+    },
+    {
+      "id": 3,
+      "name": "Contract"
+    },
+    {
+      "id": 4,
+      "name": "Manual"
+    }
+  ],
+  "documents": [
+    {
+      "id": 1,
+      "title": "Employee Handbook",
+      "description": "Company policies and procedures",
+      "categoryId": 1,
+      "departmentId": 1,
+      "status": "published",
+      "uploadedBy": 1,
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-03-01T09:00:00Z",
+      "tags": [
+        "hr",
+        "policy"
+      ],
+      "currentVersion": 3
+    },
+    {
+      "id": 2,
+      "title": "Q1 Marketing Report",
+      "description": "Marketing performance for Q1 2024",
+      "categoryId": 2,
+      "departmentId": 2,
+      "status": "published",
+      "uploadedBy": 2,
+      "createdAt": "2024-04-01T08:00:00Z",
+      "updatedAt": "2024-04-05T11:00:00Z",
+      "tags": [
+        "marketing",
+        "report"
+      ],
+      "currentVersion": 1
+    },
+    {
+      "id": 3,
+      "title": "Software Architecture Guide",
+      "description": "Technical architecture documentation",
+      "categoryId": 4,
+      "departmentId": 1,
+      "status": "draft",
+      "uploadedBy": 1,
+      "createdAt": "2024-02-10T14:00:00Z",
+      "updatedAt": "2024-02-15T10:00:00Z",
+      "tags": [
+        "engineering",
+        "architecture"
+      ],
+      "currentVersion": 2
+    },
+    {
+      "id": 4,
+      "title": "Vendor Contract Template",
+      "description": "Standard vendor contract template",
+      "categoryId": 3,
+      "departmentId": 3,
+      "status": "archived",
+      "uploadedBy": 3,
+      "createdAt": "2023-11-01T09:00:00Z",
+      "updatedAt": "2023-12-01T09:00:00Z",
+      "tags": [
+        "legal",
+        "contract"
+      ],
+      "currentVersion": 1
+    },
+    {
+      "id": 5,
+      "title": "IT Security Policy",
+      "description": "Information security guidelines",
+      "categoryId": 1,
+      "departmentId": 1,
+      "status": "published",
+      "uploadedBy": 1,
+      "createdAt": "2024-03-05T10:00:00Z",
+      "updatedAt": "2024-03-10T15:00:00Z",
+      "tags": [
+        "security",
+        "policy"
+      ],
+      "currentVersion": 2
+    },
+    {
+      "id": 6,
+      "title": "Onboarding Checklist",
+      "description": "New employee onboarding process",
+      "categoryId": 4,
+      "departmentId": 3,
+      "status": "published",
+      "uploadedBy": 3,
+      "createdAt": "2024-01-20T11:00:00Z",
+      "updatedAt": "2024-02-01T09:00:00Z",
+      "tags": [
+        "hr",
+        "onboarding"
+      ],
+      "currentVersion": 1
+    },
+    {
+      "id": 7,
+      "title": "Annual Budget Plan",
+      "description": "Financial planning for fiscal year",
+      "categoryId": 2,
+      "departmentId": 2,
+      "status": "draft",
+      "uploadedBy": 2,
+      "createdAt": "2024-04-10T09:00:00Z",
+      "updatedAt": "2024-04-10T09:00:00Z",
+      "tags": [
+        "finance",
+        "budget"
+      ],
+      "currentVersion": 1
+    },
+    {
+      "title": "Screenshot 2026 04 18 at 2.33.58 PM",
+      "description": "",
+      "categoryId": 2,
+      "departmentId": 1,
+      "status": "draft",
+      "tags": [],
+      "uploadedBy": 2,
+      "fileName": "Screenshot 2026-04-18 at 2.33.58 PM.png",
+      "currentVersion": 1,
+      "createdAt": "2026-04-18T14:18:17.343Z",
+      "updatedAt": "2026-04-18T14:18:17.343Z",
+      "id": 8
+    }
+  ],
+  "versions": [
+    {
+      "id": 1,
+      "documentId": 1,
+      "version": 1,
+      "uploadedBy": 1,
+      "createdAt": "2024-01-15T10:00:00Z",
+      "notes": "Initial upload",
+      "fileSize": "1.2 MB"
+    },
+    {
+      "id": 2,
+      "documentId": 1,
+      "version": 2,
+      "uploadedBy": 1,
+      "createdAt": "2024-02-01T09:00:00Z",
+      "notes": "Updated section 3",
+      "fileSize": "1.3 MB"
+    },
+    {
+      "id": 3,
+      "documentId": 1,
+      "version": 3,
+      "uploadedBy": 1,
+      "createdAt": "2024-03-01T09:00:00Z",
+      "notes": "Added appendix",
+      "fileSize": "1.5 MB"
+    },
+    {
+      "id": 4,
+      "documentId": 3,
+      "version": 1,
+      "uploadedBy": 1,
+      "createdAt": "2024-02-10T14:00:00Z",
+      "notes": "Initial draft",
+      "fileSize": "800 KB"
+    },
+    {
+      "id": 5,
+      "documentId": 3,
+      "version": 2,
+      "uploadedBy": 1,
+      "createdAt": "2024-02-15T10:00:00Z",
+      "notes": "Added diagrams",
+      "fileSize": "1.1 MB"
+    },
+    {
+      "id": 6,
+      "documentId": 5,
+      "version": 1,
+      "uploadedBy": 1,
+      "createdAt": "2024-03-05T10:00:00Z",
+      "notes": "Initial policy",
+      "fileSize": "600 KB"
+    },
+    {
+      "id": 7,
+      "documentId": 5,
+      "version": 2,
+      "uploadedBy": 1,
+      "createdAt": "2024-03-10T15:00:00Z",
+      "notes": "Revised access controls",
+      "fileSize": "650 KB"
+    },
+    {
+      "id": 8,
+      "documentId": 2,
+      "version": 1,
+      "uploadedBy": 2,
+      "createdAt": "2024-04-01T08:00:00Z",
+      "notes": "Initial report",
+      "fileSize": "2.1 MB"
+    },
+    {
+      "id": 9,
+      "documentId": 4,
+      "version": 1,
+      "uploadedBy": 3,
+      "createdAt": "2023-11-01T09:00:00Z",
+      "notes": "Template created",
+      "fileSize": "450 KB"
+    },
+    {
+      "id": 10,
+      "documentId": 6,
+      "version": 1,
+      "uploadedBy": 3,
+      "createdAt": "2024-01-20T11:00:00Z",
+      "notes": "Initial checklist",
+      "fileSize": "320 KB"
+    },
+    {
+      "id": 11,
+      "documentId": 7,
+      "version": 1,
+      "uploadedBy": 2,
+      "createdAt": "2024-04-10T09:00:00Z",
+      "notes": "Draft budget",
+      "fileSize": "980 KB"
+    }
+  ],
+  "comments": [
+    {
+      "id": 1,
+      "documentId": 1,
+      "userId": 2,
+      "text": "This is very helpful for new employees!",
+      "createdAt": "2024-01-16T10:00:00Z"
+    },
+    {
+      "id": 3,
+      "documentId": 1,
+      "userId": 1,
+      "text": "Yes, updating in the next version.",
+      "createdAt": "2024-01-21T09:00:00Z"
+    },
+    {
+      "id": 4,
+      "documentId": 3,
+      "userId": 2,
+      "text": "Great architecture overview!",
+      "createdAt": "2024-02-11T11:00:00Z"
+    },
+    {
+      "id": 5,
+      "documentId": 5,
+      "userId": 2,
+      "text": "We need to enforce 2FA as per section 4.",
+      "createdAt": "2024-03-06T10:00:00Z"
+    }
+  ],
+  "activityLogs": [
+    {
+      "id": 1,
+      "userId": 1,
+      "action": "LOGIN",
+      "description": "Admin logged in",
+      "createdAt": "2024-04-15T08:00:00Z"
+    },
+    {
+      "id": 2,
+      "userId": 1,
+      "action": "UPLOAD",
+      "description": "Uploaded Employee Handbook v3",
+      "createdAt": "2024-03-01T09:00:00Z"
+    },
+    {
+      "id": 3,
+      "userId": 2,
+      "action": "VIEW",
+      "description": "Viewed Q1 Marketing Report",
+      "createdAt": "2024-04-02T11:00:00Z"
+    },
+    {
+      "userId": 2,
+      "action": "VIEW",
+      "description": "Viewed Annual Budget Plan",
+      "createdAt": "2026-04-18T14:17:46.511Z",
+      "id": 5
+    },
+    {
+      "userId": 2,
+      "action": "VIEW",
+      "description": "Viewed Annual Budget Plan",
+      "createdAt": "2026-04-18T14:17:46.516Z",
+      "id": 6
+    },
+    {
+      "userId": 2,
+      "action": "VIEW",
+      "description": "Viewed Screenshot 2026 04 18 at 2.33.58 PM",
+      "createdAt": "2026-04-18T14:18:22.288Z",
+      "id": 7
+    },
+    {
+      "userId": 2,
+      "action": "VIEW",
+      "description": "Viewed Screenshot 2026 04 18 at 2.33.58 PM",
+      "createdAt": "2026-04-18T14:18:22.293Z",
+      "id": 8
+    }
+  ],
+  "tags": [
+    {
+      "id": 1,
+      "name": "hr"
+    },
+    {
+      "id": 2,
+      "name": "policy"
+    },
+    {
+      "id": 3,
+      "name": "engineering"
+    },
+    {
+      "id": 4,
+      "name": "marketing"
+    },
+    {
+      "id": 5,
+      "name": "security"
+    },
+    {
+      "id": 6,
+      "name": "legal"
+    }
+  ]
+}

@@ -1,0 +1,6 @@
+// Custom React hooks — add shared hook modules here as the project grows.
+// Example hooks to implement:
+//   - useDebounce(value, delay)
+//   - useLocalStorage(key, defaultValue)
+//   - useFetch(url, options)
+//   - usePagination(data, pageSize)
