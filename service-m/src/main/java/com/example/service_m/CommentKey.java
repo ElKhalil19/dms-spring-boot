@@ -14,7 +14,7 @@ import java.util.UUID;
 public class CommentKey implements Serializable {
 
     @PrimaryKeyColumn(name = "doc_id", ordinal = 0, type = PrimaryKeyType.PARTITIONED)
-    private UUID docId;
+    private Long docId;
 
     @PrimaryKeyColumn(name = "comment_id", ordinal = 1, type = PrimaryKeyType.CLUSTERED, ordering = Ordering.DESCENDING)
     @CassandraType(type = CassandraType.Name.TIMEUUID)
@@ -22,13 +22,13 @@ public class CommentKey implements Serializable {
 
     public CommentKey() {}
 
-    public CommentKey(UUID docId, UUID commentId) {
+    public CommentKey(Long docId, UUID commentId) {
         this.docId = docId;
         this.commentId = commentId;
     }
 
-    public UUID getDocId() { return docId; }
-    public void setDocId(UUID docId) { this.docId = docId; }
+    public Long getDocId() { return docId; }
+    public void setDocId(Long docId) { this.docId = docId; }
 
     public UUID getCommentId() { return commentId; }
     public void setCommentId(UUID commentId) { this.commentId = commentId; }

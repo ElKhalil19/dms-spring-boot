@@ -27,25 +27,36 @@ export default function DocumentDetailPage() {
   async function loadDocument() {
     setLoading(true)
     try {
-      const [docData, allVersions, cats, depts, users] = await Promise.all([
-        documentsApi.getById(id),
+      const docData = await documentsApi.getById(id)
+      setDoc(docData)
+
+      const [versionsRes, catsRes, deptsRes, usersRes] = await Promise.allSettled([
         versionsApi.getByDocument(id),
         categoriesApi.getAll(),
         departmentsApi.getAll(),
         usersApi.getAll(),
       ])
-      setDoc(docData)
-      setVersions(allVersions.sort((a, b) => b.version - a.version))
+
+      const versionData = versionsRes.status === 'fulfilled' ? versionsRes.value : []
+      const cats = catsRes.status === 'fulfilled' ? catsRes.value : []
+      const depts = deptsRes.status === 'fulfilled' ? deptsRes.value : []
+      const users = usersRes.status === 'fulfilled' ? usersRes.value : []
+
+      setVersions(versionData.sort((a, b) => b.version - a.version))
       setCategory(cats.find((c) => c.id === docData.categoryId))
       setDepartment(depts.find((d) => d.id === docData.departmentId))
       setUploader(users.find((u) => u.id === docData.uploadedBy))
 
-      await activityLogsApi.create({
-        userId: user.id,
-        action: 'VIEW',
-        description: `Viewed ${docData.title}`,
-        createdAt: new Date().toISOString(),
-      })
+      try {
+        await activityLogsApi.create({
+          userId: user.id,
+          action: 'VIEW',
+          description: `Viewed ${docData.title}`,
+          createdAt: new Date().toISOString(),
+        })
+      } catch {
+        // ignore activity log failures
+      }
     } catch {
       addToast('Failed to load document', 'error')
       navigate('/documents')

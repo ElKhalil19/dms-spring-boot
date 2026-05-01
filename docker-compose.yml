@@ -5,6 +5,16 @@ services:
       - "6379:6379"
     command: redis-server --save 60 1 --loglevel warning
 
+  minio:
+    image: minio/minio:RELEASE.2024-05-01T01-11-10Z
+    command: server /data --console-address ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=ensia123456
+
   postgres:
     image: postgres:15
     ports:
@@ -105,6 +115,20 @@ services:
       kafka-init:
         condition: service_completed_successfully
 
+  s3:
+    build:
+      context: ./service-s3
+    ports:
+      - "8010:8010"
+    environment:
+      - APP_S3_ENDPOINT=http://minio:9000
+      - APP_S3_REGION=us-east-1
+      - APP_S3_ACCESS_KEY=admin
+      - APP_S3_SECRET_KEY=ensia123456
+      - APP_S3_BUCKET=ensue
+    depends_on:
+      - minio
+
   cassandra-init:
     image: cassandra:4.1
     depends_on:
@@ -141,3 +165,33 @@ services:
     depends_on:
       cassandra-init:
         condition: service_completed_successfully
+
+  gateway:
+    build:
+      context: ./service-g
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_JWT_SECRET=${APP_JWT_SECRET}
+    depends_on:
+      - documents
+      - comments
+      - s3
+
+  kafka-consumer:
+    build:
+      context: ./service-kafka-consumer
+    environment:
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_TOPIC=dms.documents.uploaded
+    depends_on:
+      kafka-init:
+        condition: service_completed_successfully
+
+  frontend:
+    build:
+      context: ./Front-end
+    ports:
+      - "5173:80"
+    depends_on:
+      - gateway

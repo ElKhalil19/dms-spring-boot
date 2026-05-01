@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react'
-import { commentsApi, usersApi } from '@/services/api'
+import { commentsApi } from '@/services/api'
 import { useToast } from '@/context/ToastContext'
 
 export default function CommentBox({ documentId, currentUser }) {
   const [comments, setComments] = useState([])
-  const [users, setUsers] = useState({})
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
@@ -17,13 +16,7 @@ export default function CommentBox({ documentId, currentUser }) {
   async function loadComments() {
     setLoading(true)
     try {
-      const [commentData, userData] = await Promise.all([
-        commentsApi.getByDocument(documentId),
-        usersApi.getAll(),
-      ])
-      const userMap = {}
-      userData.forEach((u) => { userMap[u.id] = u })
-      setUsers(userMap)
+      const commentData = await commentsApi.getByDocument(documentId)
       setComments(commentData)
     } catch {
       addToast('Failed to load comments', 'error')
@@ -35,11 +28,16 @@ export default function CommentBox({ documentId, currentUser }) {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!text.trim()) return
+    if (!currentUser) {
+      addToast('Please sign in to comment', 'error')
+      return
+    }
     setSubmitting(true)
     try {
       const newComment = await commentsApi.create({
         documentId,
         userId: currentUser.id,
+        author: currentUser.name || currentUser.email,
         text: text.trim(),
         createdAt: new Date().toISOString(),
       })
@@ -66,7 +64,7 @@ export default function CommentBox({ documentId, currentUser }) {
           {comments.map((c) => (
             <li key={c.id} className="comment-item">
               <div className="comment-header">
-                <strong>{users[c.userId]?.name || 'Unknown'}</strong>
+                <strong>{c.author || 'Unknown'}</strong>
                 <span className="text-muted comment-date">
                   {new Date(c.createdAt).toLocaleString()}
                 </span>

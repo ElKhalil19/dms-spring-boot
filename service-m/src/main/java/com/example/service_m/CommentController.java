@@ -1,10 +1,11 @@
 package com.example.service_m;
 
 import com.datastax.oss.driver.api.core.uuid.Uuids;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/comments")
@@ -17,17 +18,49 @@ public class CommentController {
     }
 
     @PostMapping("/add")
-    public Comment add(@RequestBody Comment comment) {
-        if (comment.getKey() == null) {
-            comment.setKey(new CommentKey());
-        }
-        // Auto-generate a time-based UUID (TIMEUUID) so comments are ordered by insertion time
-        comment.getKey().setCommentId(Uuids.timeBased());
-        return repository.save(comment);
+    public CommentResponse addLegacy(@RequestBody CommentRequest comment) {
+        return add(comment);
+    }
+
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public CommentResponse add(@RequestBody CommentRequest comment) {
+        Comment saved = saveComment(comment);
+        return toResponse(saved);
     }
 
     @GetMapping("/list/{docId}")
-    public List<Comment> list(@PathVariable UUID docId) {
-        return repository.findByKeyDocId(docId);
+    public List<CommentResponse> listLegacy(@PathVariable Long docId) {
+        return list(docId);
+    }
+
+    @GetMapping
+    public List<CommentResponse> list(@RequestParam("documentId") Long docId) {
+        return repository.findByKeyDocId(docId).stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private Comment saveComment(CommentRequest request) {
+        Comment comment = new Comment();
+        CommentKey key = new CommentKey();
+        key.setDocId(request.documentId());
+        key.setCommentId(Uuids.timeBased());
+        comment.setKey(key);
+        comment.setAuthor(request.author());
+        comment.setUserId(request.userId());
+        comment.setText(request.text());
+        comment.setCreatedAt(request.createdAt() != null ? request.createdAt() : Instant.now());
+        return repository.save(comment);
+    }
+
+    private CommentResponse toResponse(Comment comment) {
+        return new CommentResponse(
+                comment.getKey().getCommentId().toString(),
+                comment.getKey().getDocId(),
+                comment.getUserId(),
+                comment.getAuthor(),
+                comment.getText(),
+                comment.getCreatedAt());
     }
 }

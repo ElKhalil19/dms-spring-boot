@@ -39,11 +39,32 @@ $$;
 
 -- 2. Create the partitioned parent table with RANGE partitioning on created_at
 CREATE TABLE IF NOT EXISTS document (
-  id         BIGSERIAL,
-  title      VARCHAR(255),
-  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  id              BIGSERIAL,
+  title           VARCHAR(255),
+  description     TEXT,
+  status          VARCHAR(50),
+  tags            TEXT,
+  category_id     BIGINT,
+  department_id   BIGINT,
+  current_version INTEGER,
+  file_name       VARCHAR(255),
+  s3_key          VARCHAR(512),
+  uploaded_by     BIGINT,
+  created_at      TIMESTAMP NOT NULL DEFAULT now(),
+  updated_at      TIMESTAMP,
   PRIMARY KEY (id, created_at)
 ) PARTITION BY RANGE (created_at);
+
+ALTER TABLE document ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS status VARCHAR(50);
+ALTER TABLE document ADD COLUMN IF NOT EXISTS tags TEXT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS category_id BIGINT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS department_id BIGINT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS current_version INTEGER;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);
+ALTER TABLE document ADD COLUMN IF NOT EXISTS s3_key VARCHAR(512);
+ALTER TABLE document ADD COLUMN IF NOT EXISTS uploaded_by BIGINT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
 
 -- 3. Create 4 quarterly child partitions for 2025
 CREATE TABLE IF NOT EXISTS document_2025_q1
