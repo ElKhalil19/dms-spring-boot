@@ -7,5 +7,6 @@ public record UserAccount(
         String role,
         Long departmentId,
         String status,
-        String password
+        String passwordHash,
+        String passwordSalt
 ) {}

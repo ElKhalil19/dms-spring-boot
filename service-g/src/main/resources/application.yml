@@ -28,5 +28,5 @@ spring:
                 - RewritePath=/api/(?<segment>.*), /${segment}
 app:
   jwt:
-    secret: ${APP_JWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+    secret: ${APP_JWT_SECRET}
     ttl-minutes: ${APP_JWT_TTL_MINUTES:120}

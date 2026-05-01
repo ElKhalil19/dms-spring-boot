@@ -72,7 +72,7 @@ The services rely on these defaults (override via env vars if needed):
 | s3 | `APP_S3_ACCESS_KEY` | `admin` |
 | s3 | `APP_S3_SECRET_KEY` | `ensia123456` |
 | s3 | `APP_S3_BUCKET` | `ensue` |
-| gateway | `APP_JWT_SECRET` | `0123456789abcdef...` |
+| gateway | `APP_JWT_SECRET` | **required** |
 | kafka-consumer | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
 | kafka-consumer | `KAFKA_TOPIC` | `dms.documents.uploaded` |
 
@@ -82,7 +82,10 @@ Kubernetes manifests live under [`k8s/`](./k8s). Apply them in this order:
 
 1. `redis.yaml`, `postgres.yaml`, `cassandra.yaml`, `minio.yaml`
 2. `zookeeper.yaml`, `kafka.yaml`, `kafka-init-job.yaml`
-3. `documents.yaml`, `comments.yaml`, `s3.yaml`, `gateway.yaml`, `kafka-consumer.yaml`, `frontend.yaml`
+3. `gateway-secret.yaml` (edit the secret value first)
+4. `documents.yaml`, `comments.yaml`, `s3.yaml`, `gateway.yaml`, `kafka-consumer.yaml`, `frontend.yaml`
+
+For Docker Compose, set `APP_JWT_SECRET` in your environment (or a `.env` file) before running.
 
 The manifests assume images tagged as:
 

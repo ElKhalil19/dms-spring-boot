@@ -19,7 +19,10 @@ spec:
             - containerPort: 8080
           env:
             - name: APP_JWT_SECRET
-              value: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+              valueFrom:
+                secretKeyRef:
+                  name: gateway-jwt-secret
+                  key: APP_JWT_SECRET
 ---
 apiVersion: v1
 kind: Service

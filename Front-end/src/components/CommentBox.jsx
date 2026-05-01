@@ -28,12 +28,16 @@ export default function CommentBox({ documentId, currentUser }) {
   async function handleSubmit(e) {
     e.preventDefault()
     if (!text.trim()) return
+    if (!currentUser) {
+      addToast('Please sign in to comment', 'error')
+      return
+    }
     setSubmitting(true)
     try {
       const newComment = await commentsApi.create({
         documentId,
-        userId: currentUser?.id ?? null,
-        author: currentUser?.name || currentUser?.email || 'Anonymous',
+        userId: currentUser.id,
+        author: currentUser.name || currentUser.email,
         text: text.trim(),
         createdAt: new Date().toISOString(),
       })
