@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.ResponseBytes;
-import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectResponse;
@@ -67,7 +66,7 @@ public class S3Controller {
                 .bucket(bucketName)
                 .key(fileName) // Use the safe variable
                 .build(),
-                RequestBody.fromBytes(file.getBytes()));
+                software.amazon.awssdk.core.sync.RequestBody.fromBytes(file.getBytes()));
             return "Upload Successful: " + file.getOriginalFilename();
         } catch (Exception e) {
             return "Upload Failed: " + e.getMessage();

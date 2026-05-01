@@ -20,21 +20,23 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        return userStore.findByEmailAndPassword(request.email(), request.password())
-                .map(account -> {
-                    UserSummary user = new UserSummary(
-                            account.id(),
-                            account.name(),
-                            account.email(),
-                            account.role(),
-                            account.departmentId(),
-                            account.status());
-                    String token = jwtService.generateToken(user);
-                    Instant expiresAt = jwtService.expiryInstant();
-                    return ResponseEntity.ok(new LoginResponse(token, user, expiresAt.toString()));
-                })
-                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body("Invalid email or password"));
+        var accountOpt = userStore.findByEmailAndPassword(request.email(), request.password());
+        if (accountOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Invalid email or password");
+        }
+
+        var account = accountOpt.get();
+        UserSummary user = new UserSummary(
+                account.id(),
+                account.name(),
+                account.email(),
+                account.role(),
+                account.departmentId(),
+                account.status());
+        String token = jwtService.generateToken(user);
+        Instant expiresAt = jwtService.expiryInstant();
+        return ResponseEntity.ok(new LoginResponse(token, user, expiresAt.toString()));
     }
 }
 

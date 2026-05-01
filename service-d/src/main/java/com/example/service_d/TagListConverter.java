@@ -1,28 +1,25 @@
 package com.example.service_d;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Converter
 public class TagListConverter implements AttributeConverter<List<String>, String> {
-
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     @Override
     public String convertToDatabaseColumn(List<String> attribute) {
         if (attribute == null) {
             return null;
         }
-        try {
-            return mapper.writeValueAsString(attribute);
-        } catch (JsonProcessingException ex) {
-            throw new IllegalArgumentException("Failed to serialize tags", ex);
-        }
+        return attribute.stream()
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.joining(","));
     }
 
     @Override
@@ -30,10 +27,9 @@ public class TagListConverter implements AttributeConverter<List<String>, String
         if (dbData == null || dbData.isBlank()) {
             return Collections.emptyList();
         }
-        try {
-            return mapper.readValue(dbData, mapper.getTypeFactory().constructCollectionType(List.class, String.class));
-        } catch (JsonProcessingException ex) {
-            throw new IllegalArgumentException("Failed to deserialize tags", ex);
-        }
+        return Arrays.stream(dbData.split(","))
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .collect(Collectors.toList());
     }
 }
