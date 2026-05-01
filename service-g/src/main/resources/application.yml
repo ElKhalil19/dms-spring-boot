@@ -20,3 +20,13 @@ spring:
                 - Path=/api/comments/**
               filters:
                 - RewritePath=/api/(?<segment>.*), /${segment}
+            - id: s3
+              uri: http://s3:8010
+              predicates:
+                - Path=/api/s3/**
+              filters:
+                - RewritePath=/api/(?<segment>.*), /${segment}
+app:
+  jwt:
+    secret: ${APP_JWT_SECRET:0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+    ttl-minutes: ${APP_JWT_TTL_MINUTES:120}

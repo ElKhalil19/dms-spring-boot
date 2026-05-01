@@ -1,9 +1,18 @@
 const BASE_URL = '/api'
 
+function getAuthToken() {
+  return localStorage.getItem('dms-token')
+}
+
 async function request(path, options = {}) {
   const url = `${BASE_URL}${path}`
+  const token = getAuthToken()
   const config = {
-    headers: { 'Content-Type': 'application/json', ...options.headers },
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      ...options.headers,
+    },
     ...options,
   }
   if (config.body && typeof config.body !== 'string') {
@@ -36,14 +45,11 @@ export const usersApi = {
   create: (data) => api.post('/users', data),
   update: (id, data) => api.patch(`/users/${id}`, data),
   delete: (id) => api.delete(`/users/${id}`),
-  // NOTE: This client-side credential check is for development/demo only (json-server mock).
-  // In production, authentication must be handled by a secure backend with hashed passwords.
-  login: async ({ email, password }) => {
-    const users = await api.get('/users')
-    const user = users.find((u) => u.email === email && u.password === password)
-    if (!user) throw new Error('Invalid email or password')
-    return user
-  },
+}
+
+// --- Auth ---
+export const authApi = {
+  login: (data) => api.post('/auth/login', data),
 }
 
 // --- Documents ---
@@ -66,6 +72,11 @@ export const commentsApi = {
   getByDocument: (documentId) => api.get('/comments', { documentId }),
   create: (data) => api.post('/comments', data),
   delete: (id) => api.delete(`/comments/${id}`),
+}
+
+// --- S3 ---
+export const s3Api = {
+  presignUpload: (data) => api.post('/s3/presign', data),
 }
 
 // --- Categories ---

@@ -1,5 +1,5 @@
 import { createContext, useContext, useReducer } from 'react'
-import { usersApi } from '@/services/api'
+import { authApi } from '@/services/api'
 
 const AuthContext = createContext(null)
 
@@ -31,10 +31,11 @@ export function AuthProvider({ children }) {
   const login = async ({ email, password }) => {
     dispatch({ type: 'LOGIN_START' })
     try {
-      const user = await usersApi.login({ email, password })
-      localStorage.setItem('dms-user', JSON.stringify(user))
-      dispatch({ type: 'LOGIN_SUCCESS', payload: user })
-      return user
+      const result = await authApi.login({ email, password })
+      localStorage.setItem('dms-user', JSON.stringify(result.user))
+      localStorage.setItem('dms-token', result.token)
+      dispatch({ type: 'LOGIN_SUCCESS', payload: result.user })
+      return result.user
     } catch (err) {
       dispatch({ type: 'LOGIN_FAILURE', payload: err.message })
       throw err
@@ -43,6 +44,7 @@ export function AuthProvider({ children }) {
 
   const logout = () => {
     localStorage.removeItem('dms-user')
+    localStorage.removeItem('dms-token')
     dispatch({ type: 'LOGOUT' })
   }
 

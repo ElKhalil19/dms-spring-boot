@@ -42,3 +42,53 @@ The topic is created explicitly by:
 
 `DocumentService.addDocument()` calls `DocumentEventProducer.publishDocumentUploaded()` **after** the document has been successfully persisted to PostgreSQL via `repository.save()`. Publishing is fire-and-forget (async); a failure to reach Kafka is logged but does not roll back the database transaction, keeping the two concerns loosely coupled.
 
+## Local stack (Docker Compose)
+
+The default `docker-compose.yml` brings up:
+
+- **gateway** (`:8080`) – API entry point and JWT authentication
+- **documents** (`:8081`) – PostgreSQL + Redis-backed document store
+- **comments** (`:8083`) – Cassandra-backed comments store
+- **s3** (`:8010`) + **minio** (`:9000`) – presigned uploads and binary storage
+- **kafka** + **zookeeper** – event streaming
+- **kafka-consumer** – Python consumer for document events
+- **frontend** (`:5173`) – UI served from Nginx
+
+Before uploading files, create the `ensue` bucket in MinIO (http://localhost:9001) using the credentials above.
+
+### Required environment variables
+
+The services rely on these defaults (override via env vars if needed):
+
+| Service | Variable | Default |
+|---|---|---|
+| documents | `SPRING_DATASOURCE_URL` | `jdbc:postgresql://postgres:5432/dms` |
+| documents | `SPRING_DATASOURCE_USERNAME` | `postgres` |
+| documents | `SPRING_DATASOURCE_PASSWORD` | `postgres` |
+| documents | `SPRING_REDIS_HOST` | `redis` |
+| documents | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
+| comments | `CASSANDRA_CONTACT_POINTS` | `cassandra` |
+| s3 | `APP_S3_ENDPOINT` | `http://minio:9000` |
+| s3 | `APP_S3_ACCESS_KEY` | `admin` |
+| s3 | `APP_S3_SECRET_KEY` | `ensia123456` |
+| s3 | `APP_S3_BUCKET` | `ensue` |
+| gateway | `APP_JWT_SECRET` | `0123456789abcdef...` |
+| kafka-consumer | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
+| kafka-consumer | `KAFKA_TOPIC` | `dms.documents.uploaded` |
+
+## Kubernetes manifests
+
+Kubernetes manifests live under [`k8s/`](./k8s). Apply them in this order:
+
+1. `redis.yaml`, `postgres.yaml`, `cassandra.yaml`, `minio.yaml`
+2. `zookeeper.yaml`, `kafka.yaml`, `kafka-init-job.yaml`
+3. `documents.yaml`, `comments.yaml`, `s3.yaml`, `gateway.yaml`, `kafka-consumer.yaml`, `frontend.yaml`
+
+The manifests assume images tagged as:
+
+- `dms-documents:latest`
+- `dms-comments:latest`
+- `dms-s3:latest`
+- `dms-gateway:latest`
+- `dms-kafka-consumer:latest`
+- `dms-frontend:latest`

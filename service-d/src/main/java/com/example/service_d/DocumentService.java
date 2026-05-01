@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Collections;
 
 @Service
 public class DocumentService {
@@ -29,6 +30,15 @@ public class DocumentService {
 
     @CachePut(value = "documents", key = "#result.id")
     public Document addDocument(Document doc) {
+        if (doc.getCurrentVersion() == null) {
+            doc.setCurrentVersion(1);
+        }
+        if (doc.getStatus() == null) {
+            doc.setStatus("draft");
+        }
+        if (doc.getTags() == null) {
+            doc.setTags(Collections.emptyList());
+        }
         Document saved = repository.save(doc);
         eventProducer.publishDocumentUploaded(
                 new DocumentUploadedEvent(saved.getId(), saved.getTitle(), saved.getCreatedAt()));
@@ -43,7 +53,39 @@ public class DocumentService {
     @CacheEvict(value = "documents", key = "#id")
     public Document updateDocument(Long id, Document doc) {
         Document existing = repository.findById(id).orElseThrow();
-        existing.setTitle(doc.getTitle());
+        if (doc.getTitle() != null) {
+            existing.setTitle(doc.getTitle());
+        }
+        if (doc.getDescription() != null) {
+            existing.setDescription(doc.getDescription());
+        }
+        if (doc.getStatus() != null) {
+            existing.setStatus(doc.getStatus());
+        }
+        if (doc.getTags() != null) {
+            existing.setTags(doc.getTags());
+        }
+        if (doc.getCategoryId() != null) {
+            existing.setCategoryId(doc.getCategoryId());
+        }
+        if (doc.getDepartmentId() != null) {
+            existing.setDepartmentId(doc.getDepartmentId());
+        }
+        if (doc.getCurrentVersion() != null) {
+            existing.setCurrentVersion(doc.getCurrentVersion());
+        }
+        if (doc.getFileName() != null) {
+            existing.setFileName(doc.getFileName());
+        }
+        if (doc.getS3Key() != null) {
+            existing.setS3Key(doc.getS3Key());
+        }
+        if (doc.getUploadedBy() != null) {
+            existing.setUploadedBy(doc.getUploadedBy());
+        }
+        if (doc.getUpdatedAt() != null) {
+            existing.setUpdatedAt(doc.getUpdatedAt());
+        }
         return repository.save(existing);
     }
 }

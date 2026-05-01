@@ -14,11 +14,15 @@ CREATE KEYSPACE IF NOT EXISTS dms
   WITH replication = {'class': 'SimpleStrategy', 'replication_factor': '1'}
   AND durable_writes = true;
 
+DROP TABLE IF EXISTS dms.comments;
+
 CREATE TABLE IF NOT EXISTS dms.comments (
-  doc_id     uuid,
+  doc_id     bigint,
   comment_id timeuuid,
-  content    text,
+  text       text,
   author     text,
+  user_id    bigint,
+  created_at timestamp,
   PRIMARY KEY ((doc_id), comment_id)
 ) WITH CLUSTERING ORDER BY (comment_id DESC);
 EOF

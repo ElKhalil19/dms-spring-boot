@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
-import { documentsApi, categoriesApi, departmentsApi } from '@/services/api'
+import { documentsApi, categoriesApi, departmentsApi, s3Api } from '@/services/api'
 import { useAuth } from '@/context/AuthContext'
 
 export default function UploadModal({ onClose, onSuccess }) {
@@ -8,6 +8,7 @@ export default function UploadModal({ onClose, onSuccess }) {
   const [categories, setCategories] = useState([])
   const [departments, setDepartments] = useState([])
   const [dragging, setDragging] = useState(false)
+  const [file, setFile] = useState(null)
   const [fileName, setFileName] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -38,6 +39,7 @@ export default function UploadModal({ onClose, onSuccess }) {
 
   function handleFile(file) {
     if (file) {
+      setFile(file)
       setFileName(file.name)
       if (!form.title) {
         const name = file.name.replace(/\.[^.]+$/, '').replace(/[-_]/g, ' ')
@@ -69,6 +71,11 @@ export default function UploadModal({ onClose, onSuccess }) {
     e.preventDefault()
     setError('')
 
+    if (!file) {
+      setError('Please select a file to upload.')
+      return
+    }
+
     if (!form.title.trim()) {
       setError('Title is required.')
       return
@@ -76,6 +83,23 @@ export default function UploadModal({ onClose, onSuccess }) {
 
     setSubmitting(true)
     try {
+      const presign = await s3Api.presignUpload({
+        fileName: file.name,
+        contentType: file.type || 'application/octet-stream',
+      })
+
+      const uploadResponse = await fetch(presign.uploadUrl, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': file.type || 'application/octet-stream',
+        },
+        body: file,
+      })
+
+      if (!uploadResponse.ok) {
+        throw new Error('Failed to upload file to storage.')
+      }
+
       const tags = form.tags
         ? form.tags.split(',').map((t) => t.trim()).filter(Boolean)
         : []
@@ -89,7 +113,8 @@ export default function UploadModal({ onClose, onSuccess }) {
         status: form.status,
         tags,
         uploadedBy: user?.id || null,
-        fileName: fileName || null,
+        fileName: file.name,
+        s3Key: presign.key,
         currentVersion: 1,
         createdAt: now,
         updatedAt: now,
