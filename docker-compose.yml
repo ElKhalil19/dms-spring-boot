@@ -182,7 +182,7 @@ services:
     build:
       context: ./service-kafka-consumer
     environment:
-      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
       - KAFKA_TOPIC=dms.documents.uploaded
     depends_on:
       kafka-init:
