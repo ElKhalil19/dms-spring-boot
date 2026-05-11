@@ -6,6 +6,7 @@ import { useAuth } from '@/context/AuthContext'
 import { useDebounce } from '@/hooks/useDebounce'
 import Pagination from '@/components/Pagination'
 import UploadModal from '@/components/UploadModal'
+import { getUserDepartmentIds } from '@/utils/access'
 
 const STATUS_OPTIONS = ['', 'draft', 'published', 'archived']
 const STATUS_COLORS = { published: 'status-published', draft: 'status-draft', archived: 'status-archived' }
@@ -66,10 +67,7 @@ export default function DocumentListPage() {
 
   const filtered = allDocuments.filter((doc) => {
     if (user?.role !== 'admin') {
-      const userDepartmentIds = Array.isArray(user?.departmentIds) ? [...user.departmentIds] : []
-      if (user?.departmentId && !userDepartmentIds.includes(user.departmentId)) {
-        userDepartmentIds.push(user.departmentId)
-      }
+      const userDepartmentIds = getUserDepartmentIds(user)
       if (userDepartmentIds.length > 0 && !userDepartmentIds.includes(doc.departmentId)) {
         return false
       }

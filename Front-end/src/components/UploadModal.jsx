@@ -1,25 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { documentsApi, categoriesApi, departmentsApi, s3Api } from '@/services/api'
 import { useAuth } from '@/context/AuthContext'
-
-function getAllowedDepartmentIds(user) {
-  if (!user) return []
-  const ids = Array.isArray(user.departmentIds) ? [...user.departmentIds] : []
-  if (user.departmentId && !ids.includes(user.departmentId)) ids.push(user.departmentId)
-  return ids
-}
-
-function toBrowserAccessiblePresignedUrl(url) {
-  try {
-    const parsed = new URL(url)
-    if (parsed.host === 'localhost:9000' || parsed.host === 'minio:9000') {
-      return `${window.location.origin}/minio${parsed.pathname}${parsed.search}`
-    }
-    return url
-  } catch {
-    return url
-  }
-}
+import { getUserDepartmentIds, toBrowserAccessiblePresignedUrl } from '@/utils/access'
 
 export default function UploadModal({ onClose, onSuccess }) {
   const { user } = useAuth()
@@ -51,7 +33,7 @@ export default function UploadModal({ onClose, onSuccess }) {
           setDepartments(depts)
           return
         }
-        const allowed = getAllowedDepartmentIds(user)
+        const allowed = getUserDepartmentIds(user)
         const filtered = depts.filter((d) => allowed.includes(d.id))
         setDepartments(filtered)
         if (filtered.length === 1) {

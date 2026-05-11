@@ -4,18 +4,7 @@ import { documentsApi, versionsApi, categoriesApi, departmentsApi, usersApi, act
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import CommentBox from '@/components/CommentBox'
-
-function toBrowserAccessiblePresignedUrl(url) {
-  try {
-    const parsed = new URL(url)
-    if (parsed.host === 'localhost:9000' || parsed.host === 'minio:9000') {
-      return `${window.location.origin}/minio${parsed.pathname}${parsed.search}`
-    }
-    return url
-  } catch {
-    return url
-  }
-}
+import { toBrowserAccessiblePresignedUrl } from '@/utils/access'
 
 export default function DocumentDetailPage() {
   const { id } = useParams()

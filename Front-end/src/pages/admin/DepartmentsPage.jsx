@@ -1,12 +1,7 @@
 import { useState, useEffect } from 'react'
 import { categoriesApi, departmentsApi, usersApi } from '@/services/api'
 import { useToast } from '@/context/ToastContext'
-
-function getDepartmentIds(user) {
-  const ids = Array.isArray(user.departmentIds) ? [...user.departmentIds] : []
-  if (user.departmentId && !ids.includes(user.departmentId)) ids.push(user.departmentId)
-  return ids
-}
+import { getUserDepartmentIds } from '@/utils/access'
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState([])
@@ -38,11 +33,11 @@ export default function DepartmentsPage() {
   }
 
   function getUsersForDept(deptId) {
-    return users.filter((u) => getDepartmentIds(u).includes(deptId))
+    return users.filter((u) => getUserDepartmentIds(u).includes(deptId))
   }
 
   function getUnassignedOrOther(deptId) {
-    return users.filter((u) => !getDepartmentIds(u).includes(deptId))
+    return users.filter((u) => !getUserDepartmentIds(u).includes(deptId))
   }
 
   async function handleAssign(e) {
@@ -50,7 +45,7 @@ export default function DepartmentsPage() {
     if (!assignUserId || !selectedDept) return
     try {
       const selectedUser = users.find((u) => u.id === Number(assignUserId))
-      const mergedDepartmentIds = [...new Set([...getDepartmentIds(selectedUser), selectedDept.id])]
+      const mergedDepartmentIds = [...new Set([...getUserDepartmentIds(selectedUser), selectedDept.id])]
       const updated = await usersApi.update(Number(assignUserId), {
         departmentIds: mergedDepartmentIds,
         departmentId: mergedDepartmentIds[0] ?? null,
@@ -66,7 +61,7 @@ export default function DepartmentsPage() {
   async function handleRemoveUser(userId) {
     try {
       const selectedUser = users.find((u) => u.id === userId)
-      const remainingIds = getDepartmentIds(selectedUser).filter((id) => id !== selectedDept.id)
+      const remainingIds = getUserDepartmentIds(selectedUser).filter((id) => id !== selectedDept.id)
       const updated = await usersApi.update(userId, {
         departmentIds: remainingIds,
         departmentId: remainingIds[0] ?? null,

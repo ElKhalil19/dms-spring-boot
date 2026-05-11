@@ -16,6 +16,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -28,6 +29,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.server.ResponseStatusException;
 
 @RestController
 @RequestMapping("/api")
@@ -100,9 +102,9 @@ public class ProxyController {
     }
 
     @PostMapping("/documents")
-    public ResponseEntity<?> createDocument(@RequestBody String body, @RequestHeader HttpHeaders headers) {
+    public ResponseEntity<?> createDocument(@RequestBody Map<String, Object> body, @RequestHeader HttpHeaders headers) {
         UserAccount user = resolveCurrentUser(headers);
-        Long departmentId = getLongField(body, "departmentId");
+        Long departmentId = asLong(body.get("departmentId"));
         if (departmentId == null) {
             return ResponseEntity.badRequest().body("departmentId is required");
         }
@@ -155,12 +157,12 @@ public class ProxyController {
     }
 
     @PatchMapping("/documents/{id}")
-    public ResponseEntity<?> patchDocument(@PathVariable Long id, @RequestBody String body, @RequestHeader HttpHeaders headers) {
+    public ResponseEntity<?> patchDocument(@PathVariable Long id, @RequestBody Map<String, Object> body, @RequestHeader HttpHeaders headers) {
         UserAccount user = resolveCurrentUser(headers);
         if (!canAccessDocument(user, id)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
-        Long departmentId = getLongField(body, "departmentId");
+        Long departmentId = asLong(body.get("departmentId"));
         if (departmentId != null && !isAllowedDepartment(user, departmentId)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
         }
@@ -177,9 +179,9 @@ public class ProxyController {
     }
 
     @PostMapping("/comments")
-    public ResponseEntity<?> addComment(@RequestBody String body, @RequestHeader HttpHeaders headers) {
+    public ResponseEntity<?> addComment(@RequestBody Map<String, Object> body, @RequestHeader HttpHeaders headers) {
         UserAccount user = resolveCurrentUser(headers);
-        Long documentId = getLongField(body, "documentId");
+        Long documentId = asLong(body.get("documentId"));
         if (documentId == null) {
             return ResponseEntity.badRequest().body("documentId is required");
         }
@@ -214,13 +216,15 @@ public class ProxyController {
         }
     }
 
-    private ResponseEntity<?> proxyExchange(String url, HttpMethod method, String body, HttpHeaders incomingHeaders) {
+    private ResponseEntity<?> proxyExchange(String url, HttpMethod method, Object body, HttpHeaders incomingHeaders) {
         try {
             HttpHeaders forwardedHeaders = new HttpHeaders();
-            if (incomingHeaders.getContentType() != null) {
+            if (body != null && incomingHeaders.getContentType() != null) {
                 forwardedHeaders.setContentType(incomingHeaders.getContentType());
+            } else if (body != null) {
+                forwardedHeaders.setContentType(MediaType.APPLICATION_JSON);
             }
-            HttpEntity<String> requestEntity = new HttpEntity<>(body, forwardedHeaders);
+            HttpEntity<Object> requestEntity = new HttpEntity<>(body, forwardedHeaders);
             ResponseEntity<String> response = restTemplate.exchange(url, method, requestEntity, String.class);
             return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
         } catch (Exception ex) {
@@ -231,6 +235,9 @@ public class ProxyController {
 
     private UserAccount resolveCurrentUser(HttpHeaders headers) {
         String authHeader = headers.getFirst(HttpHeaders.AUTHORIZATION);
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Missing or invalid Authorization header");
+        }
         String token = authHeader.substring("Bearer ".length());
         Jws<Claims> claims = jwtService.parseToken(token);
         Long userId = Long.parseLong(claims.getPayload().getSubject());
@@ -280,22 +287,6 @@ public class ProxyController {
             ids.add(user.departmentId());
         }
         return ids;
-    }
-
-    private Long getLongField(String body, String key) {
-        if (body == null || body.isBlank()) {
-            return null;
-        }
-        String regex = "\"" + key + "\"\\s*:\\s*(-?\\d+)";
-        java.util.regex.Matcher matcher = java.util.regex.Pattern.compile(regex).matcher(body);
-        if (!matcher.find()) {
-            return null;
-        }
-        try {
-            return Long.parseLong(matcher.group(1));
-        } catch (NumberFormatException ex) {
-            return null;
-        }
     }
 
     private Long asLong(Object value) {
