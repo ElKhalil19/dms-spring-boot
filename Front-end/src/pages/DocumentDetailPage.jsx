@@ -1,9 +1,21 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { documentsApi, versionsApi, categoriesApi, departmentsApi, usersApi, activityLogsApi } from '@/services/api'
+import { documentsApi, versionsApi, categoriesApi, departmentsApi, usersApi, activityLogsApi, s3Api } from '@/services/api'
 import { useAuth } from '@/context/AuthContext'
 import { useToast } from '@/context/ToastContext'
 import CommentBox from '@/components/CommentBox'
+
+function toBrowserAccessiblePresignedUrl(url) {
+  try {
+    const parsed = new URL(url)
+    if (parsed.host === 'localhost:9000' || parsed.host === 'minio:9000') {
+      return `${window.location.origin}/minio${parsed.pathname}${parsed.search}`
+    }
+    return url
+  } catch {
+    return url
+  }
+}
 
 export default function DocumentDetailPage() {
   const { id } = useParams()
@@ -106,6 +118,19 @@ export default function DocumentDetailPage() {
     }
   }
 
+  async function handleDownload() {
+    if (!doc?.s3Key) {
+      addToast('No file is attached to this document', 'error')
+      return
+    }
+    try {
+      const data = await s3Api.presignDownload(doc.s3Key)
+      window.open(toBrowserAccessiblePresignedUrl(data.downloadUrl), '_blank', 'noopener,noreferrer')
+    } catch (err) {
+      addToast(err.message || 'Failed to prepare download', 'error')
+    }
+  }
+
   if (loading) return <div className="page-container"><p className="text-muted">Loading…</p></div>
   if (!doc) return null
 
@@ -115,8 +140,9 @@ export default function DocumentDetailPage() {
     <div className="page-container">
       <div className="page-header">
         <button className="btn btn-ghost" onClick={() => navigate('/documents')}>← Back</button>
-        <h1>{doc.title}</h1>
+        <h1>{doc.translatedTitle || doc.title}</h1>
         <span className={`status-badge ${STATUS_COLORS[doc.status] || ''}`}>{doc.status}</span>
+        <button className="btn btn-primary btn-sm" onClick={handleDownload}>Download</button>
       </div>
 
       <div className="detail-grid">

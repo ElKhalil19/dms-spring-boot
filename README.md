@@ -95,3 +95,29 @@ The manifests assume images tagged as:
 - `dms-gateway:latest`
 - `dms-kafka-consumer:latest`
 - `dms-frontend:latest`
+
+## Primary scenario demo checklist
+
+1. Start the stack with `docker compose up --build` (set `APP_JWT_SECRET` first).
+2. Login as `admin@dms.com / admin123`.
+3. Open **Admin → Departments**:
+   - Create departments: `Finance`, `IT`
+   - Create categories: `General`, `Administrative`, `Training`
+4. Open **Admin → Users** and create:
+   - `u1@ensia.dz`
+   - `u2@ensia.dz`
+   - `u3@ensia.dz`
+5. Back in **Admin → Departments**, assign:
+   - `u1` to `IT`
+   - `u2` to `Finance`
+   - `u3` to both `IT` and `Finance`
+6. Login as `u1`, upload a PDF to IT, then add a comment from the document detail page.
+7. Login as `u2`, verify only Finance documents are visible, then upload a PDF to Finance.
+8. Login as `u3`, verify both IT and Finance documents are visible and downloadable.
+9. If `translatedTitle` is produced by downstream processing, the document detail page shows it instead of the raw title.
+
+## Notes on scope
+
+- S3 upload/download is wired through pre-signed URLs and frontend proxying for local/dev compatibility.
+- Department access control for document and comment APIs is enforced in the gateway proxy.
+- Authentication remains gateway-local JWT in this repository (not a separate auth microservice).

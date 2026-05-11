@@ -18,8 +18,8 @@ export default function CommentBox({ documentId, currentUser }) {
     try {
       const commentData = await commentsApi.getByDocument(documentId)
       setComments(commentData)
-    } catch {
-      addToast('Failed to load comments', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to load comments', 'error')
     } finally {
       setLoading(false)
     }
@@ -44,8 +44,8 @@ export default function CommentBox({ documentId, currentUser }) {
       setComments((prev) => [...prev, newComment])
       setText('')
       addToast('Comment added!', 'success')
-    } catch {
-      addToast('Failed to add comment', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to add comment', 'error')
     } finally {
       setSubmitting(false)
     }

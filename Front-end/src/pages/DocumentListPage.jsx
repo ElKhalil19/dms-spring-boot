@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { documentsApi, categoriesApi, departmentsApi } from '@/services/api'
 import { useDocuments } from '@/context/DocumentContext'
+import { useAuth } from '@/context/AuthContext'
 import { useDebounce } from '@/hooks/useDebounce'
 import Pagination from '@/components/Pagination'
 import UploadModal from '@/components/UploadModal'
@@ -11,6 +12,7 @@ const STATUS_COLORS = { published: 'status-published', draft: 'status-draft', ar
 
 export default function DocumentListPage() {
   const { filters, setFilters, pagination, setPagination } = useDocuments()
+  const { user } = useAuth()
   const [allDocuments, setAllDocuments] = useState([])
   const [categories, setCategories] = useState([])
   const [departments, setDepartments] = useState([])
@@ -63,6 +65,15 @@ export default function DocumentListPage() {
   }
 
   const filtered = allDocuments.filter((doc) => {
+    if (user?.role !== 'admin') {
+      const userDepartmentIds = Array.isArray(user?.departmentIds) ? [...user.departmentIds] : []
+      if (user?.departmentId && !userDepartmentIds.includes(user.departmentId)) {
+        userDepartmentIds.push(user.departmentId)
+      }
+      if (userDepartmentIds.length > 0 && !userDepartmentIds.includes(doc.departmentId)) {
+        return false
+      }
+    }
     const q = filters.search.toLowerCase()
     const matchSearch =
       !q ||
