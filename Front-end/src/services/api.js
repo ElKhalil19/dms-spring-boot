@@ -93,6 +93,6 @@ export const departmentsApi = {
 
 // --- Activity Logs ---
 export const activityLogsApi = {
-  getAll: () => api.get('/activityLogs'),
-  create: (data) => api.post('/activityLogs', data),
+  getAll: () => api.get('/activityLogs'), // OK
+  create: () => {} // REMOVE THIS or implement backend POST
 }

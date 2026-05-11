@@ -87,18 +87,19 @@ export default function UploadModal({ onClose, onSuccess }) {
         fileName: file.name,
         contentType: file.type || 'application/octet-stream',
       })
-
-      const uploadResponse = await fetch(presign.uploadUrl, {
+      
+      const uploadRes = await fetch(presign.uploadUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': file.type || 'application/octet-stream',
         },
         body: file,
       })
-
-      if (!uploadResponse.ok) {
-        throw new Error('Failed to upload file to storage.')
+      
+      if (!uploadRes.ok) {
+        throw new Error('File upload failed')
       }
+
 
       const tags = form.tags
         ? form.tags.split(',').map((t) => t.trim()).filter(Boolean)

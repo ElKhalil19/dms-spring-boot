@@ -118,7 +118,33 @@ EXPLAIN (ANALYZE false, COSTS false, FORMAT TEXT)
 \echo '--- Partition pruning verification for 2025-11-25 (should hit Q4 only) ---'
 EXPLAIN (ANALYZE false, COSTS false, FORMAT TEXT)
   SELECT * FROM document WHERE created_at = '2025-11-25';
+-- Create categories table if not exists
+CREATE TABLE IF NOT EXISTS category (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(255) UNIQUE NOT NULL
+);
 
+-- Seed example categories
+INSERT INTO category (name) VALUES
+  ('HR'),
+  ('Finance'),
+  ('Legal'),
+  ('Engineering')
+ON CONFLICT (name) DO NOTHING;
+
+-- Create departments table if not exists
+CREATE TABLE IF NOT EXISTS department (
+  id   SERIAL PRIMARY KEY,
+  name VARCHAR(255) UNIQUE NOT NULL
+);
+
+-- Seed example departments
+INSERT INTO department (name) VALUES
+  ('IT'),
+  ('Accounting'),
+  ('HR'),
+  ('Sales')
+ON CONFLICT (name) DO NOTHING;
 SQL
 
 echo "PostgreSQL partitioning initialization complete."
