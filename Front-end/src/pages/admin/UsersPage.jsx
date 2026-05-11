@@ -40,12 +40,13 @@ export default function UsersPage() {
       const newUser = await usersApi.create({
         ...form,
         departmentId: form.departmentId ? Number(form.departmentId) : null,
+        departmentIds: form.departmentId ? [Number(form.departmentId)] : [],
       })
       setUsers((prev) => [...prev, newUser])
       setForm(EMPTY_FORM)
       addToast(`User ${newUser.name} added!`, 'success')
-    } catch {
-      addToast('Failed to add user', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to add user', 'error')
     } finally {
       setSubmitting(false)
     }
@@ -57,8 +58,8 @@ export default function UsersPage() {
       await usersApi.delete(id)
       setUsers((prev) => prev.filter((u) => u.id !== id))
       addToast('User deleted', 'success')
-    } catch {
-      addToast('Failed to delete user', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to delete user', 'error')
     }
   }
 

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { documentsApi, categoriesApi, departmentsApi, s3Api } from '@/services/api'
 import { useAuth } from '@/context/AuthContext'
+import { getUserDepartmentIds, toBrowserAccessiblePresignedUrl } from '@/utils/access'
 
 export default function UploadModal({ onClose, onSuccess }) {
   const { user } = useAuth()
@@ -28,10 +29,19 @@ export default function UploadModal({ onClose, onSuccess }) {
     Promise.all([categoriesApi.getAll(), departmentsApi.getAll()])
       .then(([cats, depts]) => {
         setCategories(cats)
-        setDepartments(depts)
+        if (user?.role === 'admin') {
+          setDepartments(depts)
+          return
+        }
+        const allowed = getUserDepartmentIds(user)
+        const filtered = depts.filter((d) => allowed.includes(d.id))
+        setDepartments(filtered)
+        if (filtered.length === 1) {
+          setForm((f) => ({ ...f, departmentId: String(filtered[0].id) }))
+        }
       })
       .catch(() => {})
-  }, [])
+  }, [user])
 
   function handleField(e) {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }))
@@ -88,7 +98,7 @@ export default function UploadModal({ onClose, onSuccess }) {
         contentType: file.type || 'application/octet-stream',
       })
       
-      const uploadRes = await fetch(presign.uploadUrl, {
+      const uploadRes = await fetch(toBrowserAccessiblePresignedUrl(presign.uploadUrl), {
         method: 'PUT',
         headers: {
           'Content-Type': file.type || 'application/octet-stream',

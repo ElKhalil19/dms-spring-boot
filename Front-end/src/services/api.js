@@ -1,4 +1,4 @@
-const BASE_URL = '/api'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api'
 
 function getAuthToken() {
   return localStorage.getItem('dms-token')
@@ -21,10 +21,12 @@ async function request(path, options = {}) {
   const response = await fetch(url, config)
   if (!response.ok) {
     const error = await response.text()
+    console.error(`API ${config.method || 'GET'} ${url} failed:`, response.status, error)
     throw new Error(error || `HTTP ${response.status}`)
   }
   if (response.status === 204) return null
-  return response.json()
+  const contentType = response.headers.get('content-type') || ''
+  return contentType.includes('application/json') ? response.json() : response.text()
 }
 
 export const api = {
@@ -77,11 +79,13 @@ export const commentsApi = {
 // --- S3 ---
 export const s3Api = {
   presignUpload: (data) => api.post('/s3/presign', data),
+  presignDownload: (key) => api.get('/s3/presign-download', { key }),
 }
 
 // --- Categories ---
 export const categoriesApi = {
   getAll: () => api.get('/categories'),
+  create: (data) => api.post('/categories', data),
 }
 
 // --- Departments ---

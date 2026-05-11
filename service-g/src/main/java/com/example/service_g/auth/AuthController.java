@@ -33,6 +33,7 @@ public class AuthController {
                 account.email(),
                 account.role(),
                 account.departmentId(),
+                account.departmentIds(),
                 account.status());
         String token = jwtService.generateToken(user);
         Instant expiresAt = jwtService.expiryInstant();

@@ -53,6 +53,7 @@ record CreateUserRequest(
         String password,
         String role,
         Long departmentId,
+        List<Long> departmentIds,
         String status
 ) {}
 
@@ -62,5 +63,6 @@ record UpdateUserRequest(
         String password,
         String role,
         Long departmentId,
+        List<Long> departmentIds,
         String status
 ) {}

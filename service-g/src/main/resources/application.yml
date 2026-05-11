@@ -3,29 +3,6 @@ server:
 spring:
   application:
     name: gateway-service
-  cloud:
-    gateway:
-      server:
-        webmvc:
-          routes:
-            - id: documents
-              uri: http://documents:8081 # Changed from localhost
-              predicates:
-                - Path=/api/documents/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /${segment}
-            - id: comments
-              uri: http://comments:8083 # Changed from localhost
-              predicates:
-                - Path=/api/comments/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /${segment}
-            - id: s3
-              uri: http://s3:8010
-              predicates:
-                - Path=/api/s3/**
-              filters:
-                - RewritePath=/api/(?<segment>.*), /${segment}
 app:
   jwt:
     secret: ${APP_JWT_SECRET}

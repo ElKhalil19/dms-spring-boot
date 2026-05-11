@@ -1,12 +1,16 @@
 import { useState, useEffect } from 'react'
-import { departmentsApi, usersApi } from '@/services/api'
+import { categoriesApi, departmentsApi, usersApi } from '@/services/api'
 import { useToast } from '@/context/ToastContext'
+import { getUserDepartmentIds } from '@/utils/access'
 
 export default function DepartmentsPage() {
   const [departments, setDepartments] = useState([])
+  const [categories, setCategories] = useState([])
   const [users, setUsers] = useState([])
   const [selectedDept, setSelectedDept] = useState(null)
   const [assignUserId, setAssignUserId] = useState('')
+  const [newDepartmentName, setNewDepartmentName] = useState('')
+  const [newCategoryName, setNewCategoryName] = useState('')
   const [loading, setLoading] = useState(true)
   const { addToast } = useToast()
 
@@ -17,44 +21,81 @@ export default function DepartmentsPage() {
   async function loadData() {
     setLoading(true)
     try {
-      const [d, u] = await Promise.all([departmentsApi.getAll(), usersApi.getAll()])
+      const [d, u, c] = await Promise.all([departmentsApi.getAll(), usersApi.getAll(), categoriesApi.getAll()])
       setDepartments(d)
       setUsers(u)
-    } catch {
-      addToast('Failed to load data', 'error')
+      setCategories(c)
+    } catch (err) {
+      addToast(err.message || 'Failed to load data', 'error')
     } finally {
       setLoading(false)
     }
   }
 
   function getUsersForDept(deptId) {
-    return users.filter((u) => u.departmentId === deptId)
+    return users.filter((u) => getUserDepartmentIds(u).includes(deptId))
   }
 
   function getUnassignedOrOther(deptId) {
-    return users.filter((u) => u.departmentId !== deptId)
+    return users.filter((u) => !getUserDepartmentIds(u).includes(deptId))
   }
 
   async function handleAssign(e) {
     e.preventDefault()
     if (!assignUserId || !selectedDept) return
     try {
-      const updated = await usersApi.update(Number(assignUserId), { departmentId: selectedDept.id })
+      const selectedUser = users.find((u) => u.id === Number(assignUserId))
+      const mergedDepartmentIds = [...new Set([...getUserDepartmentIds(selectedUser), selectedDept.id])]
+      const updated = await usersApi.update(Number(assignUserId), {
+        departmentIds: mergedDepartmentIds,
+        departmentId: mergedDepartmentIds[0] ?? null,
+      })
       setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
       setAssignUserId('')
       addToast(`User assigned to ${selectedDept.name}`, 'success')
-    } catch {
-      addToast('Failed to assign user', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to assign user', 'error')
     }
   }
 
   async function handleRemoveUser(userId) {
     try {
-      const updated = await usersApi.update(userId, { departmentId: null })
+      const selectedUser = users.find((u) => u.id === userId)
+      const remainingIds = getUserDepartmentIds(selectedUser).filter((id) => id !== selectedDept.id)
+      const updated = await usersApi.update(userId, {
+        departmentIds: remainingIds,
+        departmentId: remainingIds[0] ?? null,
+      })
       setUsers((prev) => prev.map((u) => (u.id === updated.id ? updated : u)))
       addToast('User removed from department', 'success')
-    } catch {
-      addToast('Failed to remove user', 'error')
+    } catch (err) {
+      addToast(err.message || 'Failed to remove user', 'error')
+    }
+  }
+
+  async function handleCreateDepartment(e) {
+    e.preventDefault()
+    if (!newDepartmentName.trim()) return
+    try {
+      const created = await departmentsApi.create({ name: newDepartmentName.trim() })
+      setDepartments((prev) => [...prev, created])
+      setNewDepartmentName('')
+      addToast('Department created', 'success')
+    } catch (err) {
+      addToast(err.message || 'Failed to create department', 'error')
+    }
+  }
+
+  async function handleCreateCategory(e) {
+    e.preventDefault()
+    if (!newCategoryName.trim()) return
+    try {
+      const created = await categoriesApi.create({ name: newCategoryName.trim() })
+      setCategories((prev) => [...prev, created])
+      setNewCategoryName('')
+      addToast('Category created', 'success')
+    } catch (err) {
+      addToast(err.message || 'Failed to create category', 'error')
     }
   }
 
@@ -64,6 +105,29 @@ export default function DepartmentsPage() {
     <div className="page-container">
       <div className="page-header">
         <h1>Departments</h1>
+      </div>
+      <div className="card" style={{ marginBottom: '1rem' }}>
+        <form className="form-row" onSubmit={handleCreateDepartment} style={{ marginBottom: '1rem' }}>
+          <input
+            className="form-control"
+            placeholder="New department name"
+            value={newDepartmentName}
+            onChange={(e) => setNewDepartmentName(e.target.value)}
+          />
+          <button className="btn btn-primary" type="submit">Create Department</button>
+        </form>
+        <form className="form-row" onSubmit={handleCreateCategory}>
+          <input
+            className="form-control"
+            placeholder="New category name"
+            value={newCategoryName}
+            onChange={(e) => setNewCategoryName(e.target.value)}
+          />
+          <button className="btn btn-secondary" type="submit">Create Category</button>
+        </form>
+        <p className="text-muted" style={{ marginTop: '0.75rem' }}>
+          Categories: {categories.map((c) => c.name).join(', ') || '—'}
+        </p>
       </div>
 
       <div className="dept-layout">

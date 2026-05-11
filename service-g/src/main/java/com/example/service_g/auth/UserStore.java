@@ -2,6 +2,7 @@ package com.example.service_g.auth;
 
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -16,8 +17,8 @@ public class UserStore {
     private final PasswordHasher passwordHasher = new PasswordHasher();
 
     public UserStore() {
-        users.put(1L, createAccount(1L, "Admin User", "admin@dms.com", "admin", null, "active", "admin123"));
-        users.put(2L, createAccount(2L, "Bob User", "bob@dms.com", "user", null, "active", "user123"));
+        users.put(1L, createAccount(1L, "Admin User", "admin@dms.com", "admin", null, null, "active", "admin123"));
+        users.put(2L, createAccount(2L, "Bob User", "bob@dms.com", "user", null, null, "active", "user123"));
     }
 
     public Optional<UserAccount> findByEmailAndPassword(String email, String password) {
@@ -39,6 +40,10 @@ public class UserStore {
         return Optional.ofNullable(users.get(id)).map(this::toSummary);
     }
 
+    public Optional<UserAccount> getAccount(Long id) {
+        return Optional.ofNullable(users.get(id));
+    }
+
     public UserSummary createUser(CreateUserRequest request) {
         long id = idSequence.getAndIncrement();
         UserAccount account = createAccount(
@@ -47,6 +52,7 @@ public class UserStore {
                 request.email(),
                 request.role(),
                 request.departmentId(),
+                request.departmentIds(),
                 request.status() == null ? "active" : request.status(),
                 request.password());
         users.put(id, account);
@@ -66,7 +72,8 @@ public class UserStore {
                     request.name() != null ? request.name() : existing.name(),
                     request.email() != null ? request.email() : existing.email(),
                     request.role() != null ? request.role() : existing.role(),
-                    request.departmentId() != null ? request.departmentId() : existing.departmentId(),
+                    resolveDepartmentId(request, existing),
+                    resolveDepartmentIds(request, existing),
                     request.status() != null ? request.status() : existing.status(),
                     passwordHash,
                     passwordSalt);
@@ -86,6 +93,7 @@ public class UserStore {
                 account.email(),
                 account.role(),
                 account.departmentId(),
+                account.departmentIds(),
                 account.status());
     }
 
@@ -94,10 +102,50 @@ public class UserStore {
                                       String email,
                                       String role,
                                       Long departmentId,
+                                      List<Long> departmentIds,
                                       String status,
                                       String rawPassword) {
+        String passwordToHash = (rawPassword == null || rawPassword.isBlank()) ? "changeme123" : rawPassword;
         String salt = passwordHasher.generateSalt();
-        String hash = passwordHasher.hash(rawPassword, salt);
-        return new UserAccount(id, name, email, role, departmentId, status, hash, salt);
+        String hash = passwordHasher.hash(passwordToHash, salt);
+        List<Long> normalizedDepartmentIds = normalizeDepartmentIds(departmentIds, departmentId);
+        Long normalizedDepartmentId = normalizedDepartmentIds.isEmpty() ? null : normalizedDepartmentIds.get(0);
+        return new UserAccount(id, name, email, role, normalizedDepartmentId, normalizedDepartmentIds, status, hash, salt);
+    }
+
+    private Long resolveDepartmentId(UpdateUserRequest request, UserAccount existing) {
+        if (request.departmentIds() != null) {
+            List<Long> ids = normalizeDepartmentIds(request.departmentIds(), request.departmentId());
+            return ids.isEmpty() ? null : ids.get(0);
+        }
+        if (request.departmentId() != null) {
+            return request.departmentId();
+        }
+        return existing.departmentId();
+    }
+
+    private List<Long> resolveDepartmentIds(UpdateUserRequest request, UserAccount existing) {
+        if (request.departmentIds() != null) {
+            return normalizeDepartmentIds(request.departmentIds(), request.departmentId());
+        }
+        if (request.departmentId() != null) {
+            return normalizeDepartmentIds(null, request.departmentId());
+        }
+        return existing.departmentIds();
+    }
+
+    private List<Long> normalizeDepartmentIds(List<Long> departmentIds, Long departmentId) {
+        List<Long> result = new ArrayList<>();
+        if (departmentIds != null) {
+            for (Long id : departmentIds) {
+                if (id != null && !result.contains(id)) {
+                    result.add(id);
+                }
+            }
+        }
+        if (departmentId != null && !result.contains(departmentId)) {
+            result.add(0, departmentId);
+        }
+        return result;
     }
 }
