@@ -26,7 +26,19 @@ async function request(path, options = {}) {
   }
   if (response.status === 204) return null
   const contentType = response.headers.get('content-type') || ''
-  return contentType.includes('application/json') ? response.json() : response.text()
+  if (contentType.includes('application/json')) {
+    return response.json()
+  }
+  const text = await response.text()
+  const trimmed = text.trim()
+  if ((trimmed.startsWith('{') && trimmed.endsWith('}')) || (trimmed.startsWith('[') && trimmed.endsWith(']'))) {
+    try {
+      return JSON.parse(trimmed)
+    } catch {
+      return text
+    }
+  }
+  return text
 }
 
 export const api = {
@@ -98,5 +110,5 @@ export const departmentsApi = {
 // --- Activity Logs ---
 export const activityLogsApi = {
   getAll: () => api.get('/activityLogs'), // OK
-  create: () => {} // REMOVE THIS or implement backend POST
+  create: (data) => api.post('/activityLogs', data),
 }

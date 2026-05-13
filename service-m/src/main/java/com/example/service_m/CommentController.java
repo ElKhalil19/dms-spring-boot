@@ -12,9 +12,11 @@ import java.util.List;
 public class CommentController {
 
     private final CommentRepository repository;
+    private final CommentEventProducer eventProducer;
 
-    public CommentController(CommentRepository repository) {
+    public CommentController(CommentRepository repository, CommentEventProducer eventProducer) {
         this.repository = repository;
+        this.eventProducer = eventProducer;
     }
 
     @PostMapping("/add")
@@ -26,6 +28,7 @@ public class CommentController {
     @ResponseStatus(HttpStatus.CREATED)
     public CommentResponse add(@RequestBody CommentRequest comment) {
         Comment saved = saveComment(comment);
+        eventProducer.publishCommentCreated(CommentCreatedEvent.from(saved));
         return toResponse(saved);
     }
 
@@ -50,6 +53,7 @@ public class CommentController {
         comment.setAuthor(request.author());
         comment.setUserId(request.userId());
         comment.setText(request.text());
+        comment.setSourceLanguage(request.sourceLanguage() == null || request.sourceLanguage().isBlank() ? "auto" : request.sourceLanguage());
         comment.setCreatedAt(request.createdAt() != null ? request.createdAt() : Instant.now());
         return repository.save(comment);
     }
@@ -61,6 +65,9 @@ public class CommentController {
                 comment.getUserId(),
                 comment.getAuthor(),
                 comment.getText(),
+                comment.getTranslatedText(),
+                comment.getSourceLanguage(),
+                comment.getTargetLanguage(),
                 comment.getCreatedAt());
     }
 }

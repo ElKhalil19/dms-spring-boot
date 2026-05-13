@@ -9,12 +9,23 @@ import org.springframework.kafka.config.TopicBuilder;
 @Configuration
 public class KafkaTopicConfig {
 
-    @Value("${app.kafka.topic.documents-uploaded:dms.documents.uploaded}")
-    private String topicName;
+    @Value("${app.kafka.topic.documents-created:dms.documents.created}")
+    private String documentsCreatedTopicName;
+
+    @Value("${app.kafka.topic.translation-results:dms.translations.completed}")
+    private String translationResultsTopicName;
 
     @Bean
-    public NewTopic documentsUploadedTopic() {
-        return TopicBuilder.name(topicName)
+    public NewTopic documentsCreatedTopic() {
+        return TopicBuilder.name(documentsCreatedTopicName)
+                .partitions(3)
+                .replicas(1)
+                .build();
+    }
+
+    @Bean
+    public NewTopic translationResultsTopic() {
+        return TopicBuilder.name(translationResultsTopicName)
                 .partitions(3)
                 .replicas(1)
                 .build();

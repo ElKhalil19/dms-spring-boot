@@ -7,5 +7,6 @@ public record CommentRequest(
         Long userId,
         String author,
         String text,
+        String sourceLanguage,
         Instant createdAt
 ) {}

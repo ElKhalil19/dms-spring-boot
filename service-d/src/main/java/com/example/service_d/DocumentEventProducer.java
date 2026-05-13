@@ -16,7 +16,7 @@ public class DocumentEventProducer {
 
     public DocumentEventProducer(
             KafkaTemplate<String, DocumentUploadedEvent> kafkaTemplate,
-            @Value("${app.kafka.topic.documents-uploaded:dms.documents.uploaded}") String topic) {
+            @Value("${app.kafka.topic.documents-created:dms.documents.created}") String topic) {
         this.kafkaTemplate = kafkaTemplate;
         this.topic = topic;
     }

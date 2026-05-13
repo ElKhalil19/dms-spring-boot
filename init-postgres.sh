@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS document (
   file_name       VARCHAR(255),
   s3_key          VARCHAR(512),
   uploaded_by     BIGINT,
+  translated_title VARCHAR(255),
+  source_language VARCHAR(16),
+  target_language VARCHAR(16),
   created_at      TIMESTAMP NOT NULL DEFAULT now(),
   updated_at      TIMESTAMP,
   PRIMARY KEY (id, created_at)
@@ -64,6 +67,9 @@ ALTER TABLE document ADD COLUMN IF NOT EXISTS current_version INTEGER;
 ALTER TABLE document ADD COLUMN IF NOT EXISTS file_name VARCHAR(255);
 ALTER TABLE document ADD COLUMN IF NOT EXISTS s3_key VARCHAR(512);
 ALTER TABLE document ADD COLUMN IF NOT EXISTS uploaded_by BIGINT;
+ALTER TABLE document ADD COLUMN IF NOT EXISTS translated_title VARCHAR(255);
+ALTER TABLE document ADD COLUMN IF NOT EXISTS source_language VARCHAR(16);
+ALTER TABLE document ADD COLUMN IF NOT EXISTS target_language VARCHAR(16);
 ALTER TABLE document ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP;
 
 -- 3. Create 4 quarterly child partitions for 2025
@@ -136,6 +142,24 @@ ON CONFLICT (name) DO NOTHING;
 CREATE TABLE IF NOT EXISTS department (
   id   SERIAL PRIMARY KEY,
   name VARCHAR(255) UNIQUE NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS document_version (
+  id BIGSERIAL PRIMARY KEY,
+  document_id BIGINT NOT NULL,
+  version INTEGER NOT NULL,
+  uploaded_by BIGINT,
+  created_at TIMESTAMP NOT NULL DEFAULT now(),
+  notes TEXT,
+  file_size VARCHAR(64)
+);
+
+CREATE TABLE IF NOT EXISTS activity_log (
+  id BIGSERIAL PRIMARY KEY,
+  user_id BIGINT,
+  action VARCHAR(64),
+  description TEXT,
+  created_at TIMESTAMP NOT NULL DEFAULT now()
 );
 
 -- Seed example departments

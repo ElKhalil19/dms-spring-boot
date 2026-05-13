@@ -8,5 +8,8 @@ public record CommentResponse(
         Long userId,
         String author,
         String text,
+        String translatedText,
+        String sourceLanguage,
+        String targetLanguage,
         Instant createdAt
 ) {}

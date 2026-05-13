@@ -97,7 +97,6 @@ export default function UploadModal({ onClose, onSuccess }) {
         fileName: file.name,
         contentType: file.type || 'application/octet-stream',
       })
-      console.log('presign', presign)
       const uploadRes = await fetch(presign.uploadUrl, {
         method: 'PUT',
         headers: {

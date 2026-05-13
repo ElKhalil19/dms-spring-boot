@@ -5,7 +5,7 @@ import java.time.LocalDateTime;
 import java.util.UUID;
 
 /**
- * Event published to the dms.documents.uploaded Kafka topic after a document
+ * Event published to the dms.documents.created Kafka topic after a document
  * is successfully persisted.
  *
  * <p>Message key: {@code documentId} (String) — ensures all events for the
@@ -25,15 +25,17 @@ public class DocumentUploadedEvent {
     private Instant eventTimestamp;
     private Long documentId;
     private String title;
+    private String sourceLanguage;
     private LocalDateTime documentCreatedAt;
 
     public DocumentUploadedEvent() {}
 
-    public DocumentUploadedEvent(Long documentId, String title, LocalDateTime documentCreatedAt) {
+    public DocumentUploadedEvent(Long documentId, String title, String sourceLanguage, LocalDateTime documentCreatedAt) {
         this.eventId = UUID.randomUUID().toString();
         this.eventTimestamp = Instant.now();
         this.documentId = documentId;
         this.title = title;
+        this.sourceLanguage = sourceLanguage;
         this.documentCreatedAt = documentCreatedAt;
     }
 
@@ -48,6 +50,9 @@ public class DocumentUploadedEvent {
 
     public String getTitle() { return title; }
     public void setTitle(String title) { this.title = title; }
+
+    public String getSourceLanguage() { return sourceLanguage; }
+    public void setSourceLanguage(String sourceLanguage) { this.sourceLanguage = sourceLanguage; }
 
     public LocalDateTime getDocumentCreatedAt() { return documentCreatedAt; }
     public void setDocumentCreatedAt(LocalDateTime documentCreatedAt) { this.documentCreatedAt = documentCreatedAt; }
