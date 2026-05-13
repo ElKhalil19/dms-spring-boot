@@ -1,7 +1,6 @@
 package com.example.service_d;
 
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
@@ -24,9 +23,7 @@ public class ActivityLogController {
 
     @GetMapping
     public List<ActivityLog> getAll() {
-        return repository.findAll().stream()
-                .sorted(Comparator.comparing(ActivityLog::getCreatedAt, Comparator.nullsLast(Comparator.naturalOrder())).reversed())
-                .toList();
+        return repository.findAllByOrderByCreatedAtDesc();
     }
 
     @PostMapping

@@ -43,7 +43,7 @@ public class KafkaConfig {
     public ConsumerFactory<String, TranslationResultEvent> translationConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(ConsumerConfig.GROUP_ID_CONFIG, "comments-translation-consumers");
+        config.put(ConsumerConfig.GROUP_ID_CONFIG, "comments-service-translation-consumers");
         config.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         JsonDeserializer<TranslationResultEvent> deserializer = new JsonDeserializer<>(TranslationResultEvent.class);

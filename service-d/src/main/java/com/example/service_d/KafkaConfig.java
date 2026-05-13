@@ -49,7 +49,7 @@ public class KafkaConfig {
     public ConsumerFactory<String, TranslationResultEvent> translationConsumerFactory() {
         Map<String, Object> config = new HashMap<>();
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
-        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "documents-translation-consumers");
+        config.put(org.apache.kafka.clients.consumer.ConsumerConfig.GROUP_ID_CONFIG, "documents-service-translation-consumers");
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         config.put(org.apache.kafka.clients.consumer.ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         JsonDeserializer<TranslationResultEvent> jsonDeserializer = new JsonDeserializer<>(TranslationResultEvent.class);

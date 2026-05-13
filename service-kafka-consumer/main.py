@@ -56,6 +56,8 @@ class PlaceholderTranslationClient(TranslationClient):
 
 
 def detect_source_language(text, configured):
+    # Basic heuristic fallback only; replace with a dedicated language detection
+    # service/library if higher accuracy is required in production.
     if configured and configured != "auto":
         return configured.lower()
     normalized = text.lower()

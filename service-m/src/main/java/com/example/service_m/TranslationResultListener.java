@@ -14,7 +14,7 @@ public class TranslationResultListener {
         this.repository = repository;
     }
 
-    @KafkaListener(topics = "${app.kafka.topic.translation-results:dms.translations.completed}", groupId = "comments-translation-consumers", containerFactory = "translationKafkaListenerContainerFactory")
+    @KafkaListener(topics = "${app.kafka.topic.translation-results:dms.translations.completed}", groupId = "comments-service-translation-consumers", containerFactory = "translationKafkaListenerContainerFactory")
     public void onTranslationResult(TranslationResultEvent event) {
         if (event == null || event.getEntityType() == null || !"COMMENT".equalsIgnoreCase(event.getEntityType())) {
             return;

@@ -13,7 +13,7 @@ public class TranslationResultListener {
         this.repository = repository;
     }
 
-    @KafkaListener(topics = "${app.kafka.topic.translation-results:dms.translations.completed}", groupId = "documents-translation-consumers", containerFactory = "translationKafkaListenerContainerFactory")
+    @KafkaListener(topics = "${app.kafka.topic.translation-results:dms.translations.completed}", groupId = "documents-service-translation-consumers", containerFactory = "translationKafkaListenerContainerFactory")
     @Transactional
     public void onTranslationResult(TranslationResultEvent event) {
         if (event == null || event.getEntityType() == null || !"DOCUMENT".equalsIgnoreCase(event.getEntityType())) {
