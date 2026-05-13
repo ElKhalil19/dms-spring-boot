@@ -1,14 +1,10 @@
 package com.example.service_g;
 
-import com.example.service_g.auth.JwtService;
-import com.example.service_g.auth.UserAccount;
-import com.example.service_g.auth.UserStore;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
@@ -30,6 +26,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.server.ResponseStatusException;
+
+import com.example.service_g.auth.JwtService;
+import com.example.service_g.auth.UserAccount;
+import com.example.service_g.auth.UserStore;
+
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 
 @RestController
 @RequestMapping("/api")
@@ -225,8 +228,14 @@ public class ProxyController {
                 forwardedHeaders.setContentType(MediaType.APPLICATION_JSON);
             }
             HttpEntity<Object> requestEntity = new HttpEntity<>(body, forwardedHeaders);
+    
             ResponseEntity<String> response = restTemplate.exchange(url, method, requestEntity, String.class);
-            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    
+            HttpHeaders outgoing = new HttpHeaders();
+            if (response.getHeaders().getContentType() != null) {
+                outgoing.setContentType(response.getHeaders().getContentType());
+            }
+            return new ResponseEntity<>(response.getBody(), outgoing, response.getStatusCode());
         } catch (Exception ex) {
             log.error("Failed proxy {} {}: {}", method, url, ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Upstream service call failed");

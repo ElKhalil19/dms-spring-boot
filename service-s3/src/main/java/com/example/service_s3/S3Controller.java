@@ -110,7 +110,6 @@ public class S3Controller {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
-                .contentType(request.contentType()) // Includes the fix from earlier
                 .build();
 
         PresignedPutObjectRequest presignedRequest = s3Presigner.presignPutObject(
