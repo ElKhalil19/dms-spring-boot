@@ -45,6 +45,15 @@ public class Document implements Serializable {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
+    @Column(name = "translated_title")
+    private String translatedTitle;
+
+    @Column(name = "source_language")
+    private String sourceLanguage;
+
+    @Column(name = "target_language")
+    private String targetLanguage;
+
     public Document() {}
     public Document(String title) { this.title = title; }
 
@@ -100,4 +109,13 @@ public class Document implements Serializable {
 
     public LocalDateTime getUpdatedAt() { return updatedAt; }
     public void setUpdatedAt(LocalDateTime updatedAt) { this.updatedAt = updatedAt; }
+
+    public String getTranslatedTitle() { return translatedTitle; }
+    public void setTranslatedTitle(String translatedTitle) { this.translatedTitle = translatedTitle; }
+
+    public String getSourceLanguage() { return sourceLanguage; }
+    public void setSourceLanguage(String sourceLanguage) { this.sourceLanguage = sourceLanguage; }
+
+    public String getTargetLanguage() { return targetLanguage; }
+    public void setTargetLanguage(String targetLanguage) { this.targetLanguage = targetLanguage; }
 }

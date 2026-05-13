@@ -41,13 +41,16 @@ public class DocumentService {
         if (doc.getTags() == null) {
             doc.setTags(Collections.emptyList());
         }
+        if (doc.getSourceLanguage() == null || doc.getSourceLanguage().isBlank()) {
+            doc.setSourceLanguage("auto");
+        }
         
         // 1. Save to PostgreSQL
         Document saved = repository.save(doc);
         
         // 2. Publish to Kafka
         eventProducer.publishDocumentUploaded(
-                new DocumentUploadedEvent(saved.getId(), saved.getTitle(), saved.getCreatedAt()));
+                new DocumentUploadedEvent(saved.getId(), saved.getTitle(), saved.getSourceLanguage(), saved.getCreatedAt()));
                 
         // 3. Return saves the result to Redis cache via @CachePut
         return saved;
@@ -75,6 +78,9 @@ public class DocumentService {
         if (doc.getS3Key() != null) existing.setS3Key(doc.getS3Key());
         if (doc.getUploadedBy() != null) existing.setUploadedBy(doc.getUploadedBy());
         if (doc.getUpdatedAt() != null) existing.setUpdatedAt(doc.getUpdatedAt());
+        if (doc.getTranslatedTitle() != null) existing.setTranslatedTitle(doc.getTranslatedTitle());
+        if (doc.getSourceLanguage() != null) existing.setSourceLanguage(doc.getSourceLanguage());
+        if (doc.getTargetLanguage() != null) existing.setTargetLanguage(doc.getTargetLanguage());
         
         return repository.save(existing);
     }

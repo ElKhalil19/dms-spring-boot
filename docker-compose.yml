@@ -89,7 +89,17 @@ services:
       - |
         kafka-topics --bootstrap-server kafka:29092 \
           --create --if-not-exists \
-          --topic dms.documents.uploaded \
+          --topic dms.documents.created \
+          --partitions 3 \
+          --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic dms.comments.created \
+          --partitions 3 \
+          --replication-factor 1
+        kafka-topics --bootstrap-server kafka:29092 \
+          --create --if-not-exists \
+          --topic dms.translations.completed \
           --partitions 3 \
           --replication-factor 1
         echo "Topic created"
@@ -162,6 +172,7 @@ services:
       - "8083:8083"
     environment:
       - CASSANDRA_CONTACT_POINTS=cassandra
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
     depends_on:
       cassandra-init:
         condition: service_completed_successfully
@@ -182,8 +193,13 @@ services:
     build:
       context: ./service-kafka-consumer
     environment:
-      - SPRING_KAFKA_BOOTSTRAP_SERVERS=kafka:29092
-      - KAFKA_TOPIC=dms.documents.uploaded
+      - KAFKA_BOOTSTRAP_SERVERS=kafka:29092
+      - KAFKA_DOCUMENT_TOPIC=dms.documents.created
+      - KAFKA_COMMENT_TOPIC=dms.comments.created
+      - KAFKA_TRANSLATION_TOPIC=dms.translations.completed
+      - TRANSLATION_PROVIDER=${TRANSLATION_PROVIDER:-placeholder}
+      - TRANSLATION_API_URL=${TRANSLATION_API_URL:-}
+      - TRANSLATION_API_KEY=${TRANSLATION_API_KEY:-}
     depends_on:
       kafka-init:
         condition: service_completed_successfully

@@ -24,6 +24,15 @@ public class Comment {
     @Column("created_at")
     private Instant createdAt;
 
+    @Column("translated_text")
+    private String translatedText;
+
+    @Column("source_language")
+    private String sourceLanguage;
+
+    @Column("target_language")
+    private String targetLanguage;
+
     public Comment() {}
 
     public CommentKey getKey() { return key; }
@@ -40,4 +49,13 @@ public class Comment {
 
     public Instant getCreatedAt() { return createdAt; }
     public void setCreatedAt(Instant createdAt) { this.createdAt = createdAt; }
+
+    public String getTranslatedText() { return translatedText; }
+    public void setTranslatedText(String translatedText) { this.translatedText = translatedText; }
+
+    public String getSourceLanguage() { return sourceLanguage; }
+    public void setSourceLanguage(String sourceLanguage) { this.sourceLanguage = sourceLanguage; }
+
+    public String getTargetLanguage() { return targetLanguage; }
+    public void setTargetLanguage(String targetLanguage) { this.targetLanguage = targetLanguage; }
 }

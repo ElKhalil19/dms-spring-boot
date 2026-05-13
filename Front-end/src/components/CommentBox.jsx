@@ -7,6 +7,7 @@ export default function CommentBox({ documentId, currentUser }) {
   const [text, setText] = useState('')
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
+  const [translatedVisibility, setTranslatedVisibility] = useState({})
   const { addToast } = useToast()
 
   useEffect(() => {
@@ -18,6 +19,7 @@ export default function CommentBox({ documentId, currentUser }) {
     try {
       const commentData = await commentsApi.getByDocument(documentId)
       setComments(commentData)
+      setTranslatedVisibility({})
     } catch (err) {
       addToast(err.message || 'Failed to load comments', 'error')
     } finally {
@@ -51,6 +53,10 @@ export default function CommentBox({ documentId, currentUser }) {
     }
   }
 
+  function toggleTranslation(commentId) {
+    setTranslatedVisibility((prev) => ({ ...prev, [commentId]: !prev[commentId] }))
+  }
+
   return (
     <div className="comment-box">
       <h3 className="section-title">Comments ({comments.length})</h3>
@@ -69,7 +75,14 @@ export default function CommentBox({ documentId, currentUser }) {
                   {new Date(c.createdAt).toLocaleString()}
                 </span>
               </div>
-              <p className="comment-text">{c.text}</p>
+              <p className="comment-text">
+                {translatedVisibility[c.id] && c.translatedText ? c.translatedText : c.text}
+              </p>
+              {c.translatedText && (
+                <button className="btn btn-link btn-sm" onClick={() => toggleTranslation(c.id)} type="button">
+                  {translatedVisibility[c.id] ? 'Show original' : 'Translate'}
+                </button>
+              )}
             </li>
           ))}
         </ul>

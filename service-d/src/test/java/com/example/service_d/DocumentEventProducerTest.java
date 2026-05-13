@@ -24,7 +24,7 @@ class DocumentEventProducerTest {
 
     private DocumentEventProducer producer;
 
-    private static final String TOPIC = "dms.documents.uploaded";
+    private static final String TOPIC = "dms.documents.created";
 
     @BeforeEach
     void setUp() {
@@ -33,7 +33,7 @@ class DocumentEventProducerTest {
 
     @Test
     void publishDocumentUploaded_sendsEventWithDocumentIdAsKey() {
-        DocumentUploadedEvent event = new DocumentUploadedEvent(42L, "Test Doc", LocalDateTime.now());
+        DocumentUploadedEvent event = new DocumentUploadedEvent(42L, "Test Doc", "en", LocalDateTime.now());
 
         CompletableFuture<SendResult<String, DocumentUploadedEvent>> future = new CompletableFuture<>();
         when(kafkaTemplate.send(eq(TOPIC), eq("42"), eq(event))).thenReturn(future);
@@ -47,7 +47,7 @@ class DocumentEventProducerTest {
 
     @Test
     void publishDocumentUploaded_usesConfiguredTopic() {
-        DocumentUploadedEvent event = new DocumentUploadedEvent(1L, "Doc", LocalDateTime.now());
+        DocumentUploadedEvent event = new DocumentUploadedEvent(1L, "Doc", "en", LocalDateTime.now());
 
         CompletableFuture<SendResult<String, DocumentUploadedEvent>> future = new CompletableFuture<>();
         when(kafkaTemplate.send(eq(TOPIC), anyString(), eq(event))).thenReturn(future);

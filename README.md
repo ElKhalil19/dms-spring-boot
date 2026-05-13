@@ -6,7 +6,7 @@
 
 | Property | Value |
 |---|---|
-| Topic name | `dms.documents.uploaded` |
+| Topic name | `dms.documents.created` |
 | Partitions | **3** |
 | Replication factor | 1 (single-broker dev setup) |
 
@@ -22,6 +22,7 @@ The topic is created explicitly by:
 | `eventTimestamp` | `Instant` | When the event was produced |
 | `documentId` | `Long` | Primary key of the persisted `Document` entity |
 | `title` | `String` | Human-readable document name |
+| `sourceLanguage` | `String` | Optional source language hint (`auto`, `en`, `fr`, ...) |
 | `documentCreatedAt` | `LocalDateTime` | Timestamp the document row was first persisted |
 
 **Deliberately left out:**
@@ -51,7 +52,7 @@ The default `docker-compose.yml` brings up:
 - **comments** (`:8083`) – Cassandra-backed comments store
 - **s3** (`:8010`) + **minio** (`:9000`) – presigned uploads and binary storage
 - **kafka** + **zookeeper** – event streaming
-- **kafka-consumer** – Python consumer for document events
+- **kafka-consumer** – Python translation worker consuming document/comment create events
 - **frontend** (`:5173`) – UI served from Nginx
 
 Before uploading files, create the `ensue` bucket in MinIO (http://localhost:9001) using the credentials above.
@@ -68,13 +69,18 @@ The services rely on these defaults (override via env vars if needed):
 | documents | `SPRING_REDIS_HOST` | `redis` |
 | documents | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
 | comments | `CASSANDRA_CONTACT_POINTS` | `cassandra` |
+| comments | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
 | s3 | `APP_S3_ENDPOINT` | `http://minio:9000` |
 | s3 | `APP_S3_ACCESS_KEY` | `admin` |
 | s3 | `APP_S3_SECRET_KEY` | `ensia123456` |
 | s3 | `APP_S3_BUCKET` | `ensue` |
 | gateway | `APP_JWT_SECRET` | **required** |
 | kafka-consumer | `KAFKA_BOOTSTRAP_SERVERS` | `kafka:29092` |
-| kafka-consumer | `KAFKA_TOPIC` | `dms.documents.uploaded` |
+| kafka-consumer | `KAFKA_DOCUMENT_TOPIC` | `dms.documents.created` |
+| kafka-consumer | `KAFKA_COMMENT_TOPIC` | `dms.comments.created` |
+| kafka-consumer | `KAFKA_TRANSLATION_TOPIC` | `dms.translations.completed` |
+| kafka-consumer | `TRANSLATION_PROVIDER` | `placeholder` |
+| kafka-consumer | `TRANSLATION_API_URL` | _(empty)_ |
 
 ## Kubernetes manifests
 
@@ -115,6 +121,7 @@ The manifests assume images tagged as:
 7. Login as `u2`, verify only Finance documents are visible, then upload a PDF to Finance.
 8. Login as `u3`, verify both IT and Finance documents are visible and downloadable.
 9. If `translatedTitle` is produced by downstream processing, the document detail page shows it instead of the raw title.
+10. Click **Translate** under document titles/comments to toggle original vs translated text when translations are available.
 
 ## Notes on scope
 

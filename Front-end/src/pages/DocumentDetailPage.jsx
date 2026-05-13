@@ -20,6 +20,7 @@ export default function DocumentDetailPage() {
   const [loading, setLoading] = useState(true)
   const [versionNotes, setVersionNotes] = useState('')
   const [showVersionForm, setShowVersionForm] = useState(false)
+  const [showTranslatedTitle, setShowTranslatedTitle] = useState(false)
 
   useEffect(() => {
     loadDocument()
@@ -30,6 +31,7 @@ export default function DocumentDetailPage() {
     try {
       const docData = await documentsApi.getById(id)
       setDoc(docData)
+      setShowTranslatedTitle(false)
 
       const [versionsRes, catsRes, deptsRes, usersRes] = await Promise.allSettled([
         versionsApi.getByDocument(id),
@@ -129,7 +131,12 @@ export default function DocumentDetailPage() {
     <div className="page-container">
       <div className="page-header">
         <button className="btn btn-ghost" onClick={() => navigate('/documents')}>← Back</button>
-        <h1>{doc.translatedTitle || doc.title}</h1>
+        <h1>{showTranslatedTitle && doc.translatedTitle ? doc.translatedTitle : doc.title}</h1>
+        {doc.translatedTitle && (
+          <button className="btn btn-link btn-sm" onClick={() => setShowTranslatedTitle((v) => !v)}>
+            {showTranslatedTitle ? 'Show original' : 'Translate'}
+          </button>
+        )}
         <span className={`status-badge ${STATUS_COLORS[doc.status] || ''}`}>{doc.status}</span>
         <button className="btn btn-primary btn-sm" onClick={handleDownload}>Download</button>
       </div>

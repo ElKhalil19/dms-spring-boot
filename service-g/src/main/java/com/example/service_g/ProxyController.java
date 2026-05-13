@@ -88,6 +88,39 @@ public class ProxyController {
         }
     }
 
+    @PostMapping("/activityLogs")
+    public ResponseEntity<?> createActivityLog(@RequestBody(required = false) String body, @RequestHeader HttpHeaders headers) {
+        return proxyExchange(DOCUMENTS_BASE_URL + "/api/activityLogs", HttpMethod.POST, body, headers);
+    }
+
+    @GetMapping("/versions")
+    public ResponseEntity<?> getVersions(@RequestParam Long documentId, @RequestHeader HttpHeaders headers) {
+        UserAccount user = resolveCurrentUser(headers);
+        if (!canAccessDocument(user, documentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+        try {
+            Object body = restTemplate.getForObject(DOCUMENTS_BASE_URL + "/api/versions?documentId={documentId}", Object.class, documentId);
+            return ResponseEntity.ok(body == null ? Collections.emptyList() : body);
+        } catch (Exception ex) {
+            log.error("Failed to load versions for document {}: {}", documentId, ex.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Failed to load versions");
+        }
+    }
+
+    @PostMapping("/versions")
+    public ResponseEntity<?> createVersion(@RequestBody Map<String, Object> body, @RequestHeader HttpHeaders headers) {
+        UserAccount user = resolveCurrentUser(headers);
+        Long documentId = asLong(body.get("documentId"));
+        if (documentId == null) {
+            return ResponseEntity.badRequest().body("documentId is required");
+        }
+        if (!canAccessDocument(user, documentId)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Access denied");
+        }
+        return proxyExchange(DOCUMENTS_BASE_URL + "/api/versions", HttpMethod.POST, body, headers);
+    }
+
     @PostMapping("/s3/presign")
     public ResponseEntity<?> presignUpload(@RequestBody(required = false) String body, @RequestHeader HttpHeaders headers) {
         return proxyExchange(S3_BASE_URL + "/s3/presign", HttpMethod.POST, body, headers);
@@ -232,14 +265,26 @@ public class ProxyController {
             ResponseEntity<String> response = restTemplate.exchange(url, method, requestEntity, String.class);
     
             HttpHeaders outgoing = new HttpHeaders();
-            if (response.getHeaders().getContentType() != null) {
-                outgoing.setContentType(response.getHeaders().getContentType());
+            MediaType responseType = response.getHeaders().getContentType();
+            if (responseType != null) {
+                outgoing.setContentType(responseType);
+            } else if (looksLikeJson(response.getBody())) {
+                outgoing.setContentType(MediaType.APPLICATION_JSON);
             }
             return new ResponseEntity<>(response.getBody(), outgoing, response.getStatusCode());
         } catch (Exception ex) {
             log.error("Failed proxy {} {}: {}", method, url, ex.getMessage());
             return ResponseEntity.status(HttpStatus.BAD_GATEWAY).body("Upstream service call failed");
         }
+    }
+
+    private boolean looksLikeJson(String responseBody) {
+        if (responseBody == null) {
+            return false;
+        }
+        String trimmed = responseBody.trim();
+        return (trimmed.startsWith("{") && trimmed.endsWith("}"))
+                || (trimmed.startsWith("[") && trimmed.endsWith("]"));
     }
 
     private UserAccount resolveCurrentUser(HttpHeaders headers) {
